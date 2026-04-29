@@ -55,7 +55,7 @@ Existen dos versiones del kit:
 | Kit | Repo | Descripcion |
 |-----|------|-------------|
 | **stark-kit** | [thestark77/stark-kit](https://github.com/thestark77/stark-kit) | Version generica -- solo framework, sin contexto empresarial (esta) |
-| **be-code-kit** | [thestark77/be-code-kit](https://github.com/thestark77/be-code-kit) | Version especifica para Bemovil -- incluye contexto de negocio, repos, env templates |
+| **be-code-kit** | [IT-Bemovil/be-code-kit](https://github.com/IT-Bemovil/be-code-kit) | Version especifica para Bemovil -- incluye contexto de negocio, repos, env templates |
 
 > Si eres parte del equipo Bemovil, usa **be-code-kit**. Si quieres el framework limpio para tu propio proyecto, esta es tu version.
 
@@ -530,7 +530,7 @@ playwright install chromium
 | Proyecto | Repo | Descripcion |
 |----------|------|-------------|
 | **autoSDD** | [github.com/thestark77/autosdd](https://github.com/thestark77/autosdd) | Framework de desarrollo autonomo para agentes de IA |
-| **be-code-kit** | [github.com/thestark77/be-code-kit](https://github.com/thestark77/be-code-kit) | Version con contexto Bemovil (skills, repos, env, business logic) |
+| **be-code-kit** | [github.com/IT-Bemovil/be-code-kit](https://github.com/IT-Bemovil/be-code-kit) | Version con contexto Bemovil (skills, repos, env, business logic) |
 
 ---
 
