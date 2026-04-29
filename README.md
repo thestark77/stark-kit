@@ -241,8 +241,14 @@ tu-proyecto/
 |   +-- appVersions/               # Versiones de desarrollo (autoSDD)
 |       +-- v0.1.0/                # Primera version
 |
-|-- src/                           # Tu codigo fuente
-+-- tests/                         # Tus tests
+|-- feedback/                       # Templates para el sistema de proposals
+|   |-- FEEDBACK_TEMPLATE.md        # Plantilla para problemas con herramientas
+|   +-- DISCOVERY_TEMPLATE.md       # Plantilla para descubrimientos del proyecto
+|
+|-- proposals/                      # PRs mergeadas quedan aca como registro
+|
+|-- src/                            # Tu codigo fuente
++-- tests/                          # Tus tests
 ```
 
 > Esta es una estructura minima. Adaptala al layout de tu proyecto.
@@ -386,7 +392,9 @@ Eres un asistente de transcripcion de voz profesional. Tu unica funcion es tomar
 
 ## Sistema de Feedback Participativo
 
-El kit incluye **dos sistemas** para que todo el equipo contribuya:
+El kit incluye **dos sistemas** para que todo el equipo contribuya. Ambos funcionan igual: la IA te guia para crear un **archivo `.md`** con tu feedback o descubrimiento, y lo sube como PR al repo correspondiente. Ese archivo va a la carpeta `proposals/` con tu nombre de GitHub.
+
+**La PR contiene SOLO ese archivo** -- no modifica codigo ni configuracion. El equipo revisa, vota, y cuando se aprueba, queda como registro permanente y se aplica al proyecto.
 
 ### 1. Feedback de Herramientas -- "FEEDBACK DE USO"
 
@@ -394,10 +402,11 @@ Para reportar problemas o mejoras sobre las herramientas de IA (skills, plugins,
 
 **Flujo:**
 
-1. **Detectas un problema o mejora** -- Algo no funciona bien o se te ocurre algo mejor
-2. **Escribi "FEEDBACK DE USO"** en tu sesion de Claude Code
-3. **La IA te guia** para documentar tu experiencia
-4. **Se crea un PR** al repo del kit con la descripcion del problema y solucion propuesta
+1. **Escribi "FEEDBACK DE USO"** en tu sesion de Claude Code
+2. **La IA te guia** por la plantilla (`feedback/FEEDBACK_TEMPLATE.md`)
+3. **Se genera un archivo** `proposals/{tu-github}-{descripcion-corta}.md`
+4. **Se crea una PR** en el repo del kit
+5. **El equipo revisa y vota** en la PR
 
 ### 2. Descubrimientos del Proyecto -- "DESCUBRIMIENTO"
 
@@ -405,19 +414,24 @@ Cada desarrollador, en sus sesiones diarias, **descubre cosas sobre el proyecto*
 
 **Flujo:**
 
-1. **Descubris algo importante** -- La IA te revela algo sobre el proyecto, o vos le das contexto que deberia quedar documentado
-2. **Escribi "DESCUBRIMIENTO"** en tu sesion de Claude Code
-3. **La IA te guia** para estructurar el descubrimiento
-4. **Se crea un PR** que propone actualizar los archivos de contexto (guidelines.md, etc.)
-5. **El equipo revisa y vota** -- Si tiene sentido, se mergea
-6. **El contexto se actualiza** -- Toda IA de todo el equipo se beneficia
+1. **Escribi "DESCUBRIMIENTO"** en tu sesion de Claude Code
+2. **La IA te guia** por la plantilla (`feedback/DISCOVERY_TEMPLATE.md`)
+3. **Se genera un archivo** `proposals/{tu-github}-{descripcion-corta}.md` que incluye:
+   - Que se descubrio
+   - Que archivo de contexto deberia actualizarse
+   - El prompt/texto propuesto como cambio
+   - La evidencia de como se descubrio
+4. **Se crea una PR** en el repo del kit
+5. **El equipo revisa y vota** -- si tiene sentido, se mergea
+6. **El conocimiento se integra** -- toda IA de todo el equipo se beneficia
 
 > **Cada descubrimiento que compartis hace que la IA sea mas inteligente para TODO el equipo.**
 
-### Templates
+### Templates y carpeta de proposals
 
-- `feedback/FEEDBACK_TEMPLATE.md` -- Para problemas con herramientas
-- `feedback/DISCOVERY_TEMPLATE.md` -- Para descubrimientos sobre el proyecto
+- `feedback/FEEDBACK_TEMPLATE.md` -- Plantilla para problemas con herramientas
+- `feedback/DISCOVERY_TEMPLATE.md` -- Plantilla para descubrimientos
+- `proposals/` -- Carpeta donde quedan los archivos mergeados como registro permanente
 
 ---
 
