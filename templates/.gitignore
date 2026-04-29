@@ -1,0 +1,43 @@
+# Node
+node_modules/
+dist/
+build/
+.output/
+
+# Environment (secrets — NUNCA trackear)
+.env
+.env.*
+!.env.example
+
+# autoSDD / Claude Code artifacts
+.claude/skills/
+.claude/settings.local.json
+.claude/.stop-hook-fired
+.claude/*.bak
+.playwright-cli/
+
+# IDE / AI tool configs (por máquina, no compartir)
+.vscode/
+.cursor/
+.windsurf/
+.windsurfrules
+.continue/
+.agents/
+.roo/
+.trae/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Screenshots sueltos en raíz (deben ir en carpetas de versión)
+*.png
+*.jpg
+*.webp
+
+# Outputs (generados por agentes, no son fuente)
+outputs/
+
+# Logs
+*.log
+logs/

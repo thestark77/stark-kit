@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Sub-agent returned. Do these NOW: (1) Update PROGRESS.md with task result (DONE/FAILED/PARTIAL + 1-line note). (2) If you haven't asked the user a feedback question this version yet — ask one NOW."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "COMPACTION IMMINENT — you WILL lose conversation context. Execute NOW: (1) Update PROGRESS.md with ALL in-flight task states and decisions. (2) mem_save topic 'session/{project}/{date}' with: current task, decisions made, next steps. (3) If feedback.md not generated yet, note 'PENDING' in PROGRESS.md. After compaction: read PROGRESS.md + current prompt.md + mem_context()."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '[ -f .claude/.stop-hook-fired ] && exit 0; touch .claude/.stop-hook-fired; echo \"Pre-close: Is PROGRESS.md current? feedback.md generated for this version? Pending observations?\"'"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rm -f .claude/.stop-hook-fired"
+          },
+          {
+            "type": "command",
+            "command": "echo 'autoSDD: ORCHESTRATOR rules — inline: coordination, git, 1-file edits, reads 1-3 files. DELEGATE: 2+ files, 4+ reads, tests/builds, multi-step execution. ALWAYS DELEGATE: 2+ independent parallel tasks.'"
+          }
+        ]
+      }
+    ]
+  }
+}
