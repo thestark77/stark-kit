@@ -57,7 +57,7 @@ Existen dos versiones del kit:
 | **stark-kit** | [thestark77/stark-kit](https://github.com/thestark77/stark-kit) | Version generica -- solo framework, sin contexto empresarial (esta) |
 | **be-code-kit** | [thestark77/be-code-kit](https://github.com/thestark77/be-code-kit) | Version especifica para Bemovil -- incluye contexto de negocio, repos, env templates |
 
-> Si sos parte del equipo Bemovil, usa **be-code-kit**. Si queres el framework limpio para tu propio proyecto, esta es tu version.
+> Si eres parte del equipo Bemovil, usa **be-code-kit**. Si quieres el framework limpio para tu propio proyecto, esta es tu version.
 
 ---
 
@@ -107,13 +107,13 @@ cd stark-kit
 
 ### Directorio de destino personalizado
 
-Por defecto el instalador usa el directorio actual de trabajo. Podes especificar otro:
+Por defecto el instalador usa el directorio actual de trabajo. Puedes especificar otro:
 
 ```bash
 bash install.sh /ruta/a/mi/proyecto
 ```
 
-> Si el directorio ya existe y tiene archivos, el instalador te pregunta si queres **actualizar** -- solo sobreescribe archivos de configuracion (CLAUDE.md, context/, .claude/) sin tocar tu codigo.
+> Si el directorio ya existe y tiene archivos, el instalador te pregunta si quieres **actualizar** -- solo sobreescribe archivos de configuracion (CLAUDE.md, context/, .claude/) sin tocar tu codigo.
 
 ---
 
@@ -137,7 +137,7 @@ Si falta alguno, el instalador se detiene y te indica como instalarlo.
 
 - Valida si el directorio existe y si tiene contenido
 - Si esta vacio, lo crea sin preguntar
-- Si ya tiene archivos, te pregunta si queres continuar en **modo actualizacion**
+- Si ya tiene archivos, te pregunta si quieres continuar en **modo actualizacion**
 </details>
 
 <details>
@@ -218,7 +218,7 @@ El `AGENTS.md` incluye ejemplos de como definir agentes. Reemplazalos con los de
 cd tu-proyecto
 claude
 # Deberia arrancar Claude Code con autoSDD activo
-# Proba con: "que skills tengo disponibles?"
+# Prueba con: "que skills tengo disponibles?"
 ```
 
 ---
@@ -341,7 +341,7 @@ Una de las herramientas mas potentes del workflow no es codigo -- es **hablarle 
 | **Descarga** | [superwhisper.com](https://superwhisper.com) |
 | **Funcion** | Dictar -> IA limpia el texto -> se pega automaticamente |
 
-#### Que hace SuperWhisper por vos
+#### Que hace SuperWhisper por ti
 
 - Elimina muletillas ("eh", "este", "o sea")
 - Formatea el texto correctamente (puntuacion, parrafos)
@@ -350,9 +350,9 @@ Una de las herramientas mas potentes del workflow no es codigo -- es **hablarle 
 
 ### Alternativa gratuita: ChatGPT / Claude por voz
 
-Si no tenes licencia de SuperWhisper, podes usar cualquier chat con IA que tenga input de voz:
+Si no tienes licencia de SuperWhisper, puedes usar cualquier chat con IA que tenga input de voz:
 
-1. Abri **ChatGPT** o **Claude** en el browser
+1. Abre **ChatGPT** o **Claude** en el browser
 2. Usa el boton de **input de voz** para dictar
 3. Copia el resultado y pegalo donde lo necesites
 
@@ -402,7 +402,7 @@ Para reportar problemas o mejoras sobre las herramientas de IA (skills, plugins,
 
 **Flujo:**
 
-1. **Escribi "FEEDBACK DE USO"** en tu sesion de Claude Code
+1. **Escribe "FEEDBACK DE USO"** en tu sesion de Claude Code
 2. **La IA te guia** por la plantilla (`feedback/FEEDBACK_TEMPLATE.md`)
 3. **Se genera un archivo** `proposals/{tu-github}-{descripcion-corta}.md`
 4. **Se crea una PR** en el repo del kit
@@ -414,7 +414,7 @@ Cada desarrollador, en sus sesiones diarias, **descubre cosas sobre el proyecto*
 
 **Flujo:**
 
-1. **Escribi "DESCUBRIMIENTO"** en tu sesion de Claude Code
+1. **Escribe "DESCUBRIMIENTO"** en tu sesion de Claude Code
 2. **La IA te guia** por la plantilla (`feedback/DISCOVERY_TEMPLATE.md`)
 3. **Se genera un archivo** `proposals/{tu-github}-{descripcion-corta}.md` que incluye:
    - Que se descubrio
@@ -425,7 +425,7 @@ Cada desarrollador, en sus sesiones diarias, **descubre cosas sobre el proyecto*
 5. **El equipo revisa y vota** -- si tiene sentido, se mergea
 6. **El conocimiento se integra** -- toda IA de todo el equipo se beneficia
 
-> **Cada descubrimiento que compartis hace que la IA sea mas inteligente para TODO el equipo.**
+> **Cada descubrimiento que compartes hace que la IA sea mas inteligente para TODO el equipo.**
 
 ### Templates y carpeta de proposals
 
@@ -440,7 +440,7 @@ Cada desarrollador, en sus sesiones diarias, **descubre cosas sobre el proyecto*
 ### Flujo diario de trabajo
 
 ```bash
-# 1. Abri la terminal en la carpeta del proyecto
+# 1. Abre la terminal en la carpeta del proyecto
 cd tu-proyecto
 
 # 2. Arranca Claude Code
@@ -449,7 +449,7 @@ claude
 # 3. autoSDD se activa automaticamente
 #    La IA ya conoce las convenciones y tiene acceso a los skills.
 
-# 4. Pedi lo que necesites
+# 4. Pide lo que necesites
 #    autoSDD va a: crear version -> planificar -> delegar -> ejecutar
 ```
 
@@ -457,7 +457,7 @@ claude
 
 | Situacion | Que hacer |
 |-----------|-----------|
-| Tarea compleja (nuevo feature) | Deja que autoSDD orqueste -- describi el resultado esperado |
+| Tarea compleja (nuevo feature) | Deja que autoSDD orqueste -- describe el resultado esperado |
 | Pregunta rapida | Prefija con `[raw]` para saltear autoSDD |
 | Revisar codigo | Usa el plugin `code-review` sobre un PR |
 | Buscar un skill | Pregunta "que skills tengo disponibles?" |
@@ -499,7 +499,8 @@ claude
 
 **Solucion**:
 ```bash
-npx playwright install chromium
+npm install -g playwright
+playwright install chromium
 ```
 </details>
 
@@ -535,11 +536,11 @@ npx playwright install chromium
 
 ## Contributing / Feedback
 
-1. **Sistema de feedback** -- Escribi "FEEDBACK DE USO" en tu sesion de Claude Code
+1. **Sistema de feedback** -- Escribe "FEEDBACK DE USO" en tu sesion de Claude Code
 2. **PRs directos** -- Si sabes que cambiar, manda un PR
 3. **Issues** -- Reporta bugs o sugerencias en [github.com/thestark77/stark-kit/issues](https://github.com/thestark77/stark-kit/issues)
 
-> Si algo no funciona, si encontras una mejor forma de hacer algo -- **decilo**.
+> Si algo no funciona, si encuentras una mejor forma de hacer algo -- **dilo**.
 
 ---
 
