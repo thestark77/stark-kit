@@ -36,6 +36,57 @@ Si el proyecto es un monorepo, cada sub-proyecto tiene su propio CLAUDE.md. **Si
 | Creación de PR | `branch-pr` | Workflow de PR |
 | Seguridad, 5+ archivos | `judgment-day` | Review adversarial |
 
+## Team Knowledge Sharing — Proposals
+
+When the user says **"FEEDBACK DE USO"** or **"DESCUBRIMIENTO"**, follow this exact workflow:
+
+### 1. Guide the user
+
+- **FEEDBACK DE USO** → Read `feedback/FEEDBACK_TEMPLATE.md` and walk the user through each section (problem, context, expected vs actual, proposed solution, priority).
+- **DESCUBRIMIENTO** → Read `feedback/DISCOVERY_TEMPLATE.md` and walk the user through each section (what was discovered, which context file it affects, proposed change as a prompt, evidence, impact).
+
+### 2. Build the proposal file
+
+Create a single `.md` file with the filled-out template. The file name format is:
+
+```
+proposals/{github-username}-{short-slug}.md
+```
+
+Example: `proposals/juandev-cache-invalidation-bug.md`
+
+### 3. Create the PR
+
+```bash
+# Clone this project's kit repo to a temp dir
+git clone https://github.com/{kit-repo}.git /tmp/{repo-name}
+cd /tmp/{repo-name}
+
+# Create branch and add the proposal file
+git checkout -b proposal/{github-username}-{short-slug}
+cp {proposal-file} proposals/
+git add proposals/
+git commit -m "proposal: {short description}"
+git push -u origin proposal/{github-username}-{short-slug}
+
+# Create PR
+gh pr create --title "Proposal: {short description}" --body "$(cat <<'EOF'
+## Tipo
+- [ ] FEEDBACK DE USO — problema o mejora de herramientas
+- [ ] DESCUBRIMIENTO — conocimiento del proyecto
+
+## Resumen
+{1-2 sentences}
+
+Propuesto por @{github-username}
+EOF
+)"
+```
+
+### 4. Share the PR URL with the user
+
+The proposal file is the ONLY change in the PR. No code modifications. When the team merges the PR, the `.md` file gets added to the `proposals/` folder as a record.
+
 ## Libertad Operacional del Agente
 
 - **Base de datos LOCAL es tuya**: crear, leer, actualizar, borrar datos libremente
