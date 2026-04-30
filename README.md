@@ -499,7 +499,7 @@ claude
 
 **Solucion**:
 ```bash
-npm install -g playwright
+npm install -g @playwright/cli@latest
 playwright install chromium
 ```
 </details>
