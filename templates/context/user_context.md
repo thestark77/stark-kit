@@ -23,7 +23,7 @@
 - **Backend**: [Ej: Node.js, Express, TypeScript, Sequelize, PostgreSQL]
 - **Frontend**: [Ej: Vue 3, React, Tailwind CSS, Vite]
 - **Infraestructura**: [Ej: AWS, Docker, GitHub Actions]
-- **AI/Dev Tools**: Claude Code, autoSDD v6.1, Engram memory
+- **AI/Dev Tools**: Claude Code or OpenCode, autoSDD v6.1, Engram memory (Claude Code only — use file-based caching in OpenCode)
 - [COMPLETAR — agregá o quitá según tu experiencia real]
 
 ## Equipo y Organización
@@ -70,7 +70,7 @@
 - NUNCA agregar "Co-Authored-By" ni atribución de IA a commits — solo conventional commits
 - NUNCA hacer build después de cambios — CI/CD lo maneja
 - Usar bat/rg/fd/sd/eza — NUNCA cat/grep/find/sed/ls
-- Siempre prefijar comandos con `rtk` para optimización de tokens
+- Siempre prefijar comandos con `rtk` para optimización de tokens (solo Claude Code CLI). En OpenCode, `rtk` no está disponible — usar comandos directamente
 - TypeScript strict, `interface` sobre `type`, sin `any`
 - Código en inglés, UI en [idioma del proyecto]
 - Cuando hacés una pregunta, STOP y esperá — nunca continuár ni asumir respuestas

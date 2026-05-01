@@ -167,6 +167,38 @@ for f in opencode.json opencode.md; do
   fi
 done
 
+# ── Detect available AI agents ──────────────────────────────────
+echo ""
+print_step "" "Detectando agente de IA..."
+HAS_CLAUDE=false
+HAS_OPENCODE=false
+
+if command -v claude &>/dev/null; then
+  HAS_CLAUDE=true
+  print_ok "Claude Code CLI detectado"
+else
+  print_info "Claude Code CLI no encontrado"
+fi
+
+if command -v opencode &>/dev/null; then
+  HAS_OPENCODE=true
+  print_ok "OpenCode CLI detectado"
+else
+  print_info "OpenCode CLI no encontrado (instalar desde opencode.ai)"
+fi
+
+if $HAS_CLAUDE && $HAS_OPENCODE; then
+  print_ok "Ambos agentes detectados — configuraciones instaladas para ambos (sin conflictos)"
+elif $HAS_CLAUDE; then
+  print_ok "Usando Claude Code CLI — hooks en .claude/settings.json activos"
+elif $HAS_OPENCODE; then
+  print_ok "Usando OpenCode — instrucciones en opencode.md activas (no necesita hooks)"
+else
+  print_warn "Ningún agente de IA detectado. Instalá Claude Code CLI u OpenCode."
+  print_info "  Claude Code: npm install -g @anthropic-ai/claude-code"
+  print_info "  OpenCode:    ver https://opencode.ai"
+fi
+
 # Copiar archivos de contexto
 for f in guidelines.md business_logic.md user_context.md; do
   if [ -f "$SCRIPT_DIR/templates/context/$f" ]; then
@@ -338,8 +370,9 @@ echo -e "    1. Personalizá context/guidelines.md con el stack de tu proyecto"
 echo -e "    2. Completá context/user_context.md con tu perfil"
 echo -e "    3. Completá context/business_logic.md con la lógica de negocio de tu proyecto"
 echo -e "    4. Adaptá CLAUDE.md y AGENTS.md a tu proyecto"
-echo -e "    5. Abrí Claude Code: cd $TARGET_DIR && claude"
-echo -e "       O OpenCode: cd $TARGET_DIR && opencode"
+echo -e "    5. Abrí tu agente de IA:"
+echo -e "       Claude Code: cd $TARGET_DIR && claude"
+echo -e "       OpenCode:    cd $TARGET_DIR && opencode"
 echo -e "    6. Probá con: '¿qué skills tengo disponibles?'"
 echo ""
 echo -e "  ${BOLD}Lee el README.md para el tutorial completo.${NC}"

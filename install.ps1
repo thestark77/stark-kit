@@ -204,6 +204,38 @@ foreach ($f in @("opencode.json", "opencode.md")) {
   }
 }
 
+# ── Detect available AI agents ──────────────────────────────────
+Write-Host ""
+Print-Step "" "Detectando agente de IA..."
+$HasClaude = $false
+$HasOpenCode = $false
+
+if (Get-Command claude -ErrorAction SilentlyContinue) {
+  $HasClaude = $true
+  Print-Ok "Claude Code CLI detectado"
+} else {
+  Print-Info "Claude Code CLI no encontrado"
+}
+
+if (Get-Command opencode -ErrorAction SilentlyContinue) {
+  $HasOpenCode = $true
+  Print-Ok "OpenCode CLI detectado"
+} else {
+  Print-Info "OpenCode CLI no encontrado (instalar desde opencode.ai)"
+}
+
+if ($HasClaude -and $HasOpenCode) {
+  Print-Ok "Ambos agentes detectados — configuraciones instaladas para ambos (sin conflictos)"
+} elseif ($HasClaude) {
+  Print-Ok "Usando Claude Code CLI — hooks en .claude/settings.json activos"
+} elseif ($HasOpenCode) {
+  Print-Ok "Usando OpenCode — instrucciones en opencode.md activas (no necesita hooks)"
+} else {
+  Print-Warn "Ningún agente de IA detectado. Instalá Claude Code CLI u OpenCode."
+  Print-Info "  Claude Code: npm install -g @anthropic-ai/claude-code"
+  Print-Info "  OpenCode:    ver https://opencode.ai"
+}
+
 # Copy context files
 $contextDir = Join-Path $TargetDir "context"
 foreach ($f in @("guidelines.md", "business_logic.md", "user_context.md")) {
@@ -391,8 +423,9 @@ Write-Host "    1. Personalizá context/guidelines.md con el stack de tu proyect
 Write-Host "    2. Completá context/user_context.md con tu perfil"
 Write-Host "    3. Completá context/business_logic.md con la lógica de negocio de tu proyecto"
 Write-Host "    4. Adaptá CLAUDE.md y AGENTS.md a tu proyecto"
-Write-Host "    5. Abrí Claude Code: cd $TargetDir && claude"
-Write-Host "       O OpenCode: cd $TargetDir && opencode"
+Write-Host "    5. Abrí tu agente de IA:"
+Write-Host "       Claude Code: cd $TargetDir && claude"
+Write-Host "       OpenCode:    cd $TargetDir && opencode"
 Write-Host "    6. Probá con: '¿qué skills tengo disponibles?'"
 Write-Host ""
 Write-Host "  Lee el README.md para el tutorial completo." -ForegroundColor White
