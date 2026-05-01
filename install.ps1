@@ -2,14 +2,16 @@
 
 # stark-kit — Entorno de Desarrollo con IA, Instalador (PowerShell)
 # Uso:
-#   git clone https://github.com/thestark77/stark-kit.git; cd stark-kit; .\install.ps1 [TARGET_DIR] [-Optional]
+#   git clone https://github.com/thestark77/stark-kit.git; cd stark-kit; .\install.ps1 [TARGET_DIR] [-Optional] [-Yes]
 #
 # TARGET_DIR por defecto: directorio actual de trabajo
 # -Optional: Instala skills opcionales (vercel-react-best-practices, shadcn)
+# -Yes:      No pedir confirmación (modo automático, para scripts que llaman a stark-kit)
 
 param(
   [string]$TargetDir,
-  [switch]$Optional
+  [switch]$Optional,
+  [switch]$Yes
 )
 
 $ErrorActionPreference = "Continue"
@@ -67,6 +69,7 @@ function Print-Info {
 
 $TotalSteps = 6
 $Warnings = [System.Collections.Generic.List[string]]::new()
+$AutoYes = $Yes.IsPresent
 
 Print-Header
 
@@ -128,10 +131,12 @@ if (Test-Path $TargetDir) {
     Print-Warn "NO se tocarán las carpetas de repositorios existentes (backend/, frontend/, admin/, bemovil2-proxy/)."
     Write-Host ""
 
-    $confirm = Read-Host "  ¿Continuar con la actualización? [y/N]"
-    if ($confirm -notmatch '^[Yy]$') {
-      Write-Host "  Instalación cancelada."
-      exit 0
+    if (-not $AutoYes) {
+      $confirm = Read-Host "  ¿Continuar con la actualización? [y/N]"
+      if ($confirm -notmatch '^[Yy]$') {
+        Write-Host "  Instalación cancelada."
+        exit 0
+      }
     }
 
     $UpdateMode = $true

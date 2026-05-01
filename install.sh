@@ -3,10 +3,11 @@ set -uo pipefail
 
 # stark-kit — Entorno de Desarrollo con IA, Instalador
 # Uso:
-#   git clone https://github.com/thestark77/stark-kit.git && cd stark-kit && bash install.sh [TARGET_DIR] [--optional]
+#   git clone https://github.com/thestark77/stark-kit.git && cd stark-kit && bash install.sh [TARGET_DIR] [--optional] [--yes]
 #
 # TARGET_DIR por defecto: directorio actual de trabajo del usuario (o nombre provisto)
 # --optional: Instala skills opcionales (vercel-react-best-practices, shadcn)
+# --yes/-y:  No pedir confirmación (modo automático, para scripts que llaman a stark-kit)
 
 _starkkit_install() {
 
@@ -14,10 +15,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Parse arguments
 INSTALL_OPTIONAL=false
+AUTO_YES=false
 TARGET_DIR=""
 for arg in "$@"; do
   case "$arg" in
     --optional) INSTALL_OPTIONAL=true ;;
+    --yes|-y) AUTO_YES=true ;;
     *) TARGET_DIR="$arg" ;;
   esac
 done
@@ -103,13 +106,15 @@ if [ -d "$TARGET_DIR" ]; then
     print_warn "NO se tocarán carpetas de código existentes."
     echo ""
 
-    if [[ -r /dev/tty ]]; then
-      read -rp "  ¿Continuar con la actualización? [y/N]: " confirm </dev/tty || confirm=""
+    if [[ "$AUTO_YES" == "true" ]] || [[ -r /dev/tty ]]; then
+      if [[ "$AUTO_YES" != "true" ]]; then
+        read -rp "  ¿Continuar con la actualización? [y/N]: " confirm </dev/tty || confirm=""
+      fi
     else
       confirm="y"
     fi
 
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    if [[ "$AUTO_YES" != "true" ]] && [[ ! "$confirm" =~ ^[Yy]$ ]]; then
       echo "  Instalación cancelada."
       return 0
     fi
