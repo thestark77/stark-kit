@@ -136,12 +136,22 @@ mkdir -p "$TARGET_DIR/context/appVersions"
 mkdir -p "$TARGET_DIR/.claude"
 
 # Copiar archivos raíz
-for f in CLAUDE.md AGENTS.md .gitignore PROGRESS.md; do
+for f in CLAUDE.md AGENTS.md .gitignore; do
   if [ -f "$SCRIPT_DIR/templates/$f" ]; then
     cp "$SCRIPT_DIR/templates/$f" "$TARGET_DIR/$f"
     print_ok "$f copiado"
   fi
 done
+
+# PROGRESS.md: only copy if it doesn't exist or is still the template default (5 lines or less)
+if [ ! -f "$TARGET_DIR/PROGRESS.md" ] || [ "$(wc -l < "$TARGET_DIR/PROGRESS.md" 2>/dev/null)" -le 5 ]; then
+  if [ -f "$SCRIPT_DIR/templates/PROGRESS.md" ]; then
+    cp "$SCRIPT_DIR/templates/PROGRESS.md" "$TARGET_DIR/PROGRESS.md"
+    print_ok "PROGRESS.md copiado"
+  fi
+else
+  print_info "PROGRESS.md ya tiene contenido real — no se sobrescribe"
+fi
 
 # Copiar .claude/settings.json (hooks del proyecto)
 if [ -f "$SCRIPT_DIR/templates/.claude/settings.json" ]; then

@@ -159,12 +159,32 @@ $claudeDir = Join-Path $TargetDir ".claude"
 New-Item -ItemType Directory -Path $contextVersionsDir -Force | Out-Null
 New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
 
-# Copy CLAUDE.md, AGENTS.md, .gitignore, PROGRESS.md
-foreach ($f in @("CLAUDE.md", "AGENTS.md", ".gitignore", "PROGRESS.md")) {
+# Copy CLAUDE.md, AGENTS.md, .gitignore
+foreach ($f in @("CLAUDE.md", "AGENTS.md", ".gitignore")) {
   $src = Join-Path $ScriptDir "templates/$f"
   if (Test-Path $src) {
     Copy-Item -Path $src -Destination (Join-Path $TargetDir $f) -Force
     Print-Ok "$f copiado"
+  }
+}
+
+# PROGRESS.md: only copy if it doesn't exist or is still the template default (5 lines or less)
+$progressPath = Join-Path $TargetDir "PROGRESS.md"
+$progressSrc = Join-Path $ScriptDir "templates/PROGRESS.md"
+if (-not (Test-Path $progressPath)) {
+  if (Test-Path $progressSrc) {
+    Copy-Item -Path $progressSrc -Destination $progressPath -Force
+    Print-Ok "PROGRESS.md copiado"
+  }
+} else {
+  $progressLines = (Get-Content $progressPath -ErrorAction SilentlyContinue | Measure-Object -Line).Lines
+  if ($progressLines -le 5) {
+    if (Test-Path $progressSrc) {
+      Copy-Item -Path $progressSrc -Destination $progressPath -Force
+      Print-Ok "PROGRESS.md copiado"
+    }
+  } else {
+    Print-Info "PROGRESS.md ya tiene contenido real — no se sobrescribe"
   }
 }
 
