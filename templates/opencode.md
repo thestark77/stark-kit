@@ -1,6 +1,6 @@
 # autoSDD v6.1 — OpenCode Instructions
 
-> This file is the ONLY instruction file OpenCode reads (via contextPaths).
+> This file is loaded by OpenCode via the `instructions` field in opencode.json.
 > Do NOT read CLAUDE.md — it contains Claude Code-specific instructions (hooks, Agent() calls, Engram MCP) that are incompatible with OpenCode.
 > This file adapts the autoSDD pipeline for OpenCode's tooling.
 
@@ -94,12 +94,13 @@ ALL prompts go through autoSDD unless `[raw]`, `[no-sdd]`, or `skip autosdd`.
 
 ### Model Strategy (OpenCode)
 
-OpenCode has 4 agent slots. Model assignments come from `context/models.json`:
+OpenCode has 5 built-in agents. Model assignments are configured in `opencode.json` (see `context/models.json` for presets):
 
-- **coder** (main session): Orchestrator — coordinates, delegates, makes decisions
-- **task** (sub-agent): Context scout, implementation — reads code, executes tasks
-- **title** (session titles): Cheapest model, 80 token limit
-- **summarizer** (compaction): Saves conversation state before compaction
+- **build** (main session): Orchestrator — coordinates, delegates, makes decisions
+- **general** (sub-agent): Implementation — reads code, executes multi-step tasks
+- **explore** (sub-agent): Context scout — quick code exploration and searches
+- **title** (session titles): Cheapest model, generates session titles
+- **compaction** (context compaction): Saves conversation state before compaction
 
 When using Task tool, prefer:
 - **explore** subagent: For code exploration and quick searches

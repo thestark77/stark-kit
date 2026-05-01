@@ -1,24 +1,23 @@
 {
-  "$schema": "https://opencode.ai/schema/opencode.json",
-  "data": {
-    "directory": ".opencode"
-  },
-  "contextPaths": [
-    "opencode.md",
-    "AGENTS.md"
-  ],
-  "agents": {
-    "coder": {
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "build": {
       "model": "opencode-go/glm-5.1"
     },
-    "task": {
+    "compaction": {
+      "model": "opencode-go/deepseek-v4-flash"
+    },
+    "explore": {
+      "model": "opencode-go/deepseek-v4-flash"
+    },
+    "general": {
       "model": "opencode-go/glm-5.1"
     },
     "title": {
       "model": "opencode-go/deepseek-v4-flash"
-    },
-    "summarizer": {
-      "model": "opencode-go/deepseek-v4-flash"
     }
-  }
+  },
+  "instructions": [
+    "opencode.md"
+  ]
 }
