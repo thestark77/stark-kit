@@ -14,6 +14,7 @@
 ## Archivo(s) de Contexto a Actualizar
 
 - [ ] `context/guidelines.md` — Convenciones técnicas, patrones, seguridad, gotchas
+- [ ] `context/business_logic.md` — Lógica de negocio, entidades, flujos
 - [ ] `context/user_context.md` — Perfil del equipo, workflow, preferencias
 - [ ] `templates/CLAUDE.md` — Configuración de agentes/skills
 - [ ] `templates/AGENTS.md` — Definiciones de agentes especializados

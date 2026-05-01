@@ -23,7 +23,7 @@
 - **Backend**: [Ej: Node.js, Express, TypeScript, Sequelize, PostgreSQL]
 - **Frontend**: [Ej: Vue 3, React, Tailwind CSS, Vite]
 - **Infraestructura**: [Ej: AWS, Docker, GitHub Actions]
-- **AI/Dev Tools**: Claude Code, autoSDD v5.3, Engram memory
+- **AI/Dev Tools**: Claude Code, autoSDD v6.1, Engram memory
 - [COMPLETAR — agregá o quitá según tu experiencia real]
 
 ## Equipo y Organización

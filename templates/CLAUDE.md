@@ -9,6 +9,7 @@
 | Documento | Propósito |
 |----------|---------|
 | `context/guidelines.md` | **Constitución** — stack, convenciones, patrones, seguridad, testing |
+| `context/business_logic.md` | **Negocio** — entidades, flujos, terminología, reglas de negocio |
 | `context/user_context.md` | **Perfil de Usuario** — identidad, preferencias, estilo de trabajo |
 
 ## Routing de Sub-Proyectos
@@ -55,7 +56,14 @@ proposals/{github-username}-{short-slug}.md
 
 Example: `proposals/juandev-cache-invalidation-bug.md`
 
-### 3. Create the PR
+### 3. Determine the target repo
+
+| What changed / is affected | Target repo |
+|----------------------------|-------------|
+| autoSDD pipeline, skills, orchestrator behavior | `thestark77/autosdd` |
+| Project context (guidelines, business_logic), installer, templates, agents | `thestark77/stark-kit` |
+
+### 4. Create the PR
 
 ```bash
 # Clone this project's kit repo to a temp dir
@@ -83,7 +91,7 @@ EOF
 )"
 ```
 
-### 4. Share the PR URL with the user
+### 5. Share the PR URL with the user
 
 The proposal file is the ONLY change in the PR. No code modifications. When the team merges the PR, the `.md` file gets added to the `proposals/` folder as a record.
 
@@ -96,7 +104,7 @@ The proposal file is the ONLY change in the PR. No code modifications. When the 
 - **Leer CLAUDE.md del sub-proyecto**: Siempre leer las convenciones relevantes antes de codear
 - **Pedir contexto adicional proactivamente**: En cualquier momento — especialmente ANTES de empezar — pedir ejemplos de logs, registros de DB, respuestas de API, screenshots, o cualquier contexto que ayude a entregar mejores resultados
 
-## autoSDD v5.3 — Pipeline Activo (NO REMOVER)
+## autoSDD v6.1 — Pipeline Activo (NO REMOVER)
 
 TODOS los prompts pasan por autoSDD salvo `[raw]`, `[no-sdd]`, o `skip autosdd`.
 

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/stark--kit-v1.0-blue?style=for-the-badge" alt="version" />
-  <img src="https://img.shields.io/badge/autoSDD-v5.3-green?style=for-the-badge" alt="autoSDD" />
-  <img src="https://img.shields.io/badge/skills-15%2B-purple?style=for-the-badge" alt="skills" />
-  <img src="https://img.shields.io/badge/plugins-5-orange?style=for-the-badge" alt="plugins" />
+  <img src="https://img.shields.io/badge/stark--kit-v2.0-blue?style=for-the-badge" alt="version" />
+  <img src="https://img.shields.io/badge/autoSDD-v6.1-green?style=for-the-badge" alt="autoSDD" />
+  <img src="https://img.shields.io/badge/skills-16%2B-purple?style=for-the-badge" alt="skills" />
+  <img src="https://img.shields.io/badge/plugins-4%2B-orange?style=for-the-badge" alt="plugins" />
 </p>
 
 <h1 align="center">stark-kit</h1>
@@ -27,9 +27,10 @@
 - [Post-instalacion](#-post-instalacion)
 - [Estructura del proyecto resultante](#-estructura-del-proyecto-resultante)
 - [Lo que queda instalado](#-lo-que-queda-instalado)
-  - [autoSDD v5.3](#autosdd-v53)
-  - [Skills (15+)](#skills-instaladas-15)
-  - [Plugins (5)](#plugins-instalados-5)
+  - [autoSDD v6.1](#autosdd-v61)
+  - [Skills (16+)](#skills-instaladas-16)
+  - [Plugins (4+)](#plugins-instalados-4)
+- [Skills opcionales (--optional)](#skills-opcionales---optional)
 - [Captura de audio con IA (SuperWhisper)](#-captura-de-audio-con-ia-superwhisper)
 - [Sistema de Feedback Participativo](#-sistema-de-feedback-participativo)
 - [Como usar Claude Code con este setup](#-como-usar-claude-code-con-este-setup)
@@ -44,18 +45,18 @@
 
 **stark-kit** es un instalador automatizado que configura un entorno completo de desarrollo con IA para cualquier proyecto. En un solo comando vas a tener:
 
-- **autoSDD v5.3** -- Framework de desarrollo autonomo que orquesta sub-agentes de IA
-- **15+ skills de desarrollo** -- Desde prompt engineering hasta diseno de interfaces
-- **5 plugins de Claude Code** -- Powerline, Engram, code review, y mas
+- **autoSDD v6.1** -- Framework de desarrollo autonomo que orquesta sub-agentes de IA
+- **16+ skills de desarrollo** -- Desde prompt engineering hasta diseno de interfaces
+- **4+ plugins de Claude Code** -- Engram, code review, frontend design, y mas
 - **Engram MCP** -- Memoria persistente entre sesiones
-- **Templates genericos** -- CLAUDE.md, AGENTS.md, guidelines, user_context -- listos para personalizar
+- **Templates genericos** -- CLAUDE.md, AGENTS.md, guidelines, business_logic, user_context -- listos para personalizar
 
 Existen dos versiones del kit:
 
 | Kit | Repo | Descripcion |
 |-----|------|-------------|
 | **stark-kit** | [thestark77/stark-kit](https://github.com/thestark77/stark-kit) | Version generica -- solo framework, sin contexto empresarial (esta) |
-| **be-code-kit** | [IT-Bemovil/be-code-kit](https://github.com/IT-Bemovil/be-code-kit) | Version especifica para Bemovil -- incluye contexto de negocio, repos, env templates |
+| **be-code-kit** | [IT-Bemovil/be-code-kit](https://github.com/IT-Bemovil/be-code-kit) | Version especifica para Bemovil -- usa stark-kit como base + contexto de negocio, repos, E2E Forge, Linear MCP |
 
 > Si eres parte del equipo Bemovil, usa **be-code-kit**. Si quieres el framework limpio para tu propio proyecto, esta es tu version.
 
@@ -69,6 +70,8 @@ Existen dos versiones del kit:
 | 2 | **Git** | `git --version` | [git-scm.com/downloads](https://git-scm.com/downloads) |
 | 3 | **Claude Code CLI** | `claude --version` | `npm install -g @anthropic-ai/claude-code` |
 | 4 | **pnpm** (recomendado) | `pnpm --version` | `npm install -g pnpm` |
+
+> Si no tienes Claude Code CLI, el instalador solo copiara los archivos de configuracion. Skills y plugins se omitiran hasta que lo instales.
 
 ### Sobre Claude Code CLI
 
@@ -89,7 +92,7 @@ claude
 
 ## Instalacion
 
-### Linux / macOS / WSL / Git Bash
+### Instalacion basica (Linux / macOS / WSL / Git Bash)
 
 ```bash
 git clone https://github.com/thestark77/stark-kit.git
@@ -97,12 +100,28 @@ cd stark-kit
 bash install.sh
 ```
 
+### Instalacion con skills opcionales
+
+```bash
+bash install.sh --optional
+```
+
+El flag `--optional` installa skills adicionales que no son esenciales para todos los proyectos:
+
+| Skill | Fuente | Proposito |
+|-------|--------|-----------|
+| `vercel-react-best-practices` | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Patrones de React/Next.js de Vercel |
+| `shadcn` | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | Gestion de componentes shadcn |
+
 ### Windows (PowerShell)
 
 ```powershell
 git clone https://github.com/thestark77/stark-kit.git
 cd stark-kit
 .\install.ps1
+
+# Con skills opcionales:
+.\install.ps1 -Optional
 ```
 
 ### Directorio de destino personalizado
@@ -111,6 +130,9 @@ Por defecto el instalador usa el directorio actual de trabajo. Puedes especifica
 
 ```bash
 bash install.sh /ruta/a/mi/proyecto
+
+# Con skills opcionales:
+bash install.sh /ruta/a/mi/proyecto --optional
 ```
 
 > Si el directorio ya existe y tiene archivos, el instalador te pregunta si quieres **actualizar** -- solo sobreescribe archivos de configuracion (CLAUDE.md, context/, .claude/) sin tocar tu codigo.
@@ -125,11 +147,11 @@ El instalador ejecuta **6 pasos** en secuencia:
 <summary><strong>Paso 0 -- Verifica requisitos</strong></summary>
 
 Chequea que tengas instalados:
-- `git` -- control de versiones
-- `claude` -- Claude Code CLI
+- `git` -- control de versiones (requerido)
+- `claude` -- Claude Code CLI (recomendado; si falta, skills y plugins se omiten)
 - `npm` o `pnpm` -- gestor de paquetes
 
-Si falta alguno, el instalador se detiene y te indica como instalarlo.
+Si falta git o npm/pnpm, el instalador se detiene. Si falta Claude Code CLI, continua pero sin instalar skills ni plugins.
 </details>
 
 <details>
@@ -150,6 +172,7 @@ Copia desde `templates/` al directorio destino:
 - `.gitignore` -- Ignora node_modules, .env, builds, etc.
 - `.claude/settings.json` -- Hooks y permisos del proyecto
 - `context/guidelines.md` -- Convenciones tecnicas genericas
+- `context/business_logic.md` -- Template de logica de negocio (para que lo completes)
 - `context/user_context.md` -- Tu perfil de desarrollador (personalizable)
 </details>
 
@@ -160,7 +183,7 @@ Crea los directorios `src/` y `tests/` como punto de partida. Adapta la estructu
 </details>
 
 <details>
-<summary><strong>Paso 4 -- Instala autoSDD v5.3</strong></summary>
+<summary><strong>Paso 4 -- Instala autoSDD v6.1</strong></summary>
 
 Descarga y ejecuta el instalador interactivo de autoSDD. Selecciona al menos **"claude-code"** como agente destino.
 
@@ -171,16 +194,19 @@ autoSDD instala automaticamente:
 </details>
 
 <details>
-<summary><strong>Paso 5 -- Instala skills y plugins adicionales</strong></summary>
+<summary><strong>Paso 5 -- Instala skills y plugins</strong></summary>
 
-Instala skills extras:
-- Caveman (comunicacion ultra-comprimida)
-- Vercel React best practices
-- shadcn component management
+Skills core (siempre instaladas):
 - SDD Agent Team (branch-pr, judgment-day)
 - David Castagneto skills
 
-Y los 5 plugins de Claude Code (powerline, engram, frontend-design, code-review, code-simplifier).
+Skills opcionales (solo con `--optional`):
+- Vercel React best practices
+- shadcn component management
+
+Plugins (si Claude Code CLI esta disponible):
+- engram, frontend-design, code-review, code-simplifier
+- claude-powerline (solo si Claude Code esta instalado)
 </details>
 
 <details>
@@ -198,6 +224,9 @@ Inicializa un repo Git en la carpeta destino con los archivos de configuracion, 
 ```bash
 # Edita las guidelines con el stack de TU proyecto
 context/guidelines.md
+
+# Completa la logica de negocio de tu proyecto
+context/business_logic.md
 
 # Completa tu perfil de desarrollador
 context/user_context.md
@@ -237,6 +266,7 @@ tu-proyecto/
 |
 |-- context/
 |   |-- guidelines.md              # Convenciones tecnicas (personalizable)
+|   |-- business_logic.md          # Logica de negocio (personalizable)
 |   |-- user_context.md            # Tu perfil de desarrollador
 |   +-- appVersions/               # Versiones de desarrollo (autoSDD)
 |       +-- v0.1.0/                # Primera version
@@ -257,14 +287,14 @@ tu-proyecto/
 
 ## Lo que queda instalado
 
-### autoSDD v5.3
+### autoSDD v6.1
 
 **Framework de desarrollo autonomo** que transforma a Claude Code en un orquestador inteligente que delega trabajo a sub-agentes especializados.
 
 | Aspecto | Detalle |
 |---------|---------|
 | **Repo** | [github.com/thestark77/autosdd](https://github.com/thestark77/autosdd) |
-| **Version** | 5.3 |
+| **Version** | 6.1 |
 | **Ubicacion** | `~/.claude/skills/autosdd/SKILL.md` |
 | **Activacion** | Automatica en cada conversacion de Claude Code |
 | **Desactivacion** | Prefija tu mensaje con `[raw]`, `[no-sdd]`, o `skip autosdd` |
@@ -290,7 +320,7 @@ VERSION INIT -> TRIAGE -> ROUTE -> PLAN (CREA) -> DELEGATE -> COLLECT -> CLOSE -
 
 ---
 
-### Skills instaladas (15+)
+### Skills instaladas (16+)
 
 | Skill | Fuente | Proposito |
 |-------|--------|-----------|
@@ -303,26 +333,36 @@ VERSION INIT -> TRIAGE -> ROUTE -> PLAN (CREA) -> DELEGATE -> COLLECT -> CLOSE -
 | `claude-md-improver` | autoSDD | Auditoria y mejora de archivos CLAUDE.md |
 | `branch-pr` | [gentleman-programming/sdd-agent-team](https://github.com/gentleman-programming/sdd-agent-team) | Workflow de creacion de PRs |
 | `judgment-day` | [gentleman-programming/sdd-agent-team](https://github.com/gentleman-programming/sdd-agent-team) | Code review adversarial paralelo |
-| `caveman` | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | Comunicacion ultra-comprimida (ahorra tokens) |
-| `caveman-review` | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | Code review comprimido |
-| `compress` | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | Compresion de archivos de memoria |
-| `vercel-react-best-practices` | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Patrones de React/Next.js de Vercel |
 | `postgresql-table-design` | autoSDD | Diseno de esquemas PostgreSQL |
-| `shadcn` | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | Gestion de componentes shadcn |
 | `skill-creator` | autoSDD | Creacion de nuevas skills |
 | `knowledge-graph` | autoSDD | Grafos de conocimiento visuales |
+| `context-scout` | autoSDD | Pre-filtrado de contexto con Haiku |
+| `feedback-report` | autoSDD | Reportes de feedback y calidad |
+| `autosdd-telemetry` | autoSDD | Telemetria y auditoria del pipeline |
+| `davidcastagnetoa/skills` | [davidcastagnetoa/skills](https://github.com/davidcastagnetoa/skills) | Skills adicionales de desarrollo |
 
 ---
 
-### Plugins instalados (5)
+### Skills opcionales (--optional)
 
-| Plugin | Descripcion |
-|--------|-------------|
-| **claude-powerline** | Status line visual en la terminal -- muestra branch, modelo, tokens |
-| **engram** | Memoria persistente MCP -- recuerda decisiones, convenciones, bugs entre sesiones |
-| **frontend-design** | Plugin de diseno UI -- genera interfaces de alta calidad |
-| **code-review** | Review de codigo automatizado sobre PRs |
-| **code-simplifier** | Simplificacion y refactoring de codigo |
+Instaladas solo con `bash install.sh --optional` o `.\install.ps1 -Optional`:
+
+| Skill | Fuente | Proposito |
+|-------|--------|-----------|
+| `vercel-react-best-practices` | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Patrones de React/Next.js de Vercel |
+| `shadcn` | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | Gestion de componentes shadcn |
+
+---
+
+### Plugins instalados (4+)
+
+| Plugin | Descripcion | Condicion |
+|--------|-------------|-----------|
+| **engram** | Memoria persistente MCP -- recuerda decisiones, convenciones, bugs entre sesiones | Siempre |
+| **frontend-design** | Plugin de diseno UI -- genera interfaces de alta calidad | Siempre |
+| **code-review** | Review de codigo automatizado sobre PRs | Siempre |
+| **code-simplifier** | Simplificacion y refactoring de codigo | Siempre |
+| **claude-powerline** | Status line visual en la terminal -- muestra branch, modelo, tokens | Solo si Claude Code esta instalado |
 
 ---
 
@@ -405,7 +445,9 @@ Para reportar problemas o mejoras sobre las herramientas de IA (skills, plugins,
 1. **Escribe "FEEDBACK DE USO"** en tu sesion de Claude Code
 2. **La IA te guia** por la plantilla (`feedback/FEEDBACK_TEMPLATE.md`)
 3. **Se genera un archivo** `proposals/{tu-github}-{descripcion-corta}.md`
-4. **Se crea una PR** en el repo del kit
+4. **Se crea una PR** en el repo correspondiente:
+   - autoSDD skills/orquestador → `thestark77/autosdd`
+   - stark-kit templates/contexto → `thestark77/stark-kit`
 5. **El equipo revisa y vota** en la PR
 
 ### 2. Descubrimientos del Proyecto -- "DESCUBRIMIENTO"
@@ -493,6 +535,20 @@ claude
 </details>
 
 <details>
+<summary><strong>"Skills opcionales no se instalaron"</strong></summary>
+
+**Causa**: No usaste el flag `--optional`.
+
+**Solucion**: Ejecuta el instalador de nuevo con el flag:
+```bash
+bash install.sh --optional
+
+# En PowerShell:
+.\install.ps1 -Optional
+```
+</details>
+
+<details>
 <summary><strong>"Playwright error: browser not found"</strong></summary>
 
 **Causa**: Los browsers de Playwright no estan instalados.
@@ -530,7 +586,7 @@ playwright install chromium
 | Proyecto | Repo | Descripcion |
 |----------|------|-------------|
 | **autoSDD** | [github.com/thestark77/autosdd](https://github.com/thestark77/autosdd) | Framework de desarrollo autonomo para agentes de IA |
-| **be-code-kit** | [github.com/IT-Bemovil/be-code-kit](https://github.com/IT-Bemovil/be-code-kit) | Version con contexto Bemovil (skills, repos, env, business logic) |
+| **be-code-kit** | [github.com/IT-Bemovil/be-code-kit](https://github.com/IT-Bemovil/be-code-kit) | Version con contexto Bemovil -- usa stark-kit como base |
 
 ---
 

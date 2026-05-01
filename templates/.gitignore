@@ -12,6 +12,7 @@ build/
 # autoSDD / Claude Code artifacts
 .claude/skills/
 .claude/settings.local.json
+.claude/settings.json.bak
 .claude/.stop-hook-fired
 .claude/*.bak
 .playwright-cli/

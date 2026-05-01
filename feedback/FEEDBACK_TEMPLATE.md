@@ -34,7 +34,7 @@
 ## Información Adicional
 
 - **Skill/Plugin involucrado**: [autoSDD / nombre del skill / otro]
-- **Parte del proyecto**: [backend / frontend / infra / general]
+- **Ámbito**: [backend / frontend / infra / general]
 - **Reproducible**: [Siempre / A veces / Una sola vez]
 
 ---

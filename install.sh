@@ -3,14 +3,25 @@ set -uo pipefail
 
 # stark-kit — Entorno de Desarrollo con IA, Instalador
 # Uso:
-#   git clone https://github.com/thestark77/stark-kit.git && cd stark-kit && bash install.sh [TARGET_DIR]
+#   git clone https://github.com/thestark77/stark-kit.git && cd stark-kit && bash install.sh [TARGET_DIR] [--optional]
 #
 # TARGET_DIR por defecto: directorio actual de trabajo del usuario (o nombre provisto)
+# --optional: Instala skills opcionales (vercel-react-best-practices, shadcn)
 
 _starkkit_install() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR="${1:-$(pwd)}"
+
+# Parse arguments
+INSTALL_OPTIONAL=false
+TARGET_DIR=""
+for arg in "$@"; do
+  case "$arg" in
+    --optional) INSTALL_OPTIONAL=true ;;
+    *) TARGET_DIR="$arg" ;;
+  esac
+done
+TARGET_DIR="${TARGET_DIR:-$(pwd)}"
 
 # Colores
 RED='\033[0;31m'
@@ -52,16 +63,16 @@ if ! command -v git &>/dev/null; then
 fi
 print_ok "git instalado"
 
-if ! command -v claude &>/dev/null; then
-  print_error "Claude Code CLI no encontrado."
+HAS_CLAUDE=false
+if command -v claude &>/dev/null; then
+  HAS_CLAUDE=true
+  print_ok "Claude Code CLI instalado"
+else
+  print_warn "Claude Code CLI no encontrado."
+  print_warn "Se instalarán archivos de configuración, pero skills y plugins se omitirán."
+  print_warn "Instálalo con: npm install -g @anthropic-ai/claude-code"
   echo ""
-  echo "  Instala Claude Code primero:"
-  echo "    npm install -g @anthropic-ai/claude-code"
-  echo "    o visitá: https://claude.ai/code"
-  echo ""
-  return 1
 fi
-print_ok "Claude Code CLI instalado"
 
 if command -v pnpm &>/dev/null; then
   PKG_MGR="pnpm"
@@ -71,7 +82,9 @@ else
   print_error "npm o pnpm requerido. Instalá Node.js: https://nodejs.org"
   return 1
 fi
-print_ok "$PKG_MGR disponible"
+if [ "$INSTALL_OPTIONAL" = true ]; then
+  print_info "Se instalarán skills opcionales (--optional)"
+fi
 
 # ═══════════════════════════════════════════
 # PASO 1: Validación del directorio de destino
@@ -132,7 +145,7 @@ if [ -f "$SCRIPT_DIR/templates/.claude/settings.json" ]; then
 fi
 
 # Copiar archivos de contexto
-for f in guidelines.md user_context.md; do
+for f in guidelines.md business_logic.md user_context.md; do
   if [ -f "$SCRIPT_DIR/templates/context/$f" ]; then
     cp "$SCRIPT_DIR/templates/context/$f" "$TARGET_DIR/context/$f"
     print_ok "context/$f copiado"
@@ -155,7 +168,7 @@ print_info "Estructura base creada. Adaptala a las necesidades de tu proyecto."
 # ═══════════════════════════════════════════
 # PASO 4: Instalar autoSDD
 # ═══════════════════════════════════════════
-print_step 4 "Instalando autoSDD v5.3..."
+print_step 4 "Instalando autoSDD v6.1..."
 print_info "Esto abrirá el instalador interactivo de autoSDD."
 print_info "Seleccioná los agentes que uses (al menos claude-code)."
 echo ""
@@ -180,16 +193,15 @@ fi
 # ═══════════════════════════════════════════
 print_step 5 "Instalando skills y plugins adicionales..."
 
-# Skills que autoSDD podría NO instalar
-EXTRA_SKILLS=(
-  "JuliusBrussee/caveman"
-  "vercel-labs/agent-skills"
-  "shadcn-ui/ui"
+if [ "$HAS_CLAUDE" = true ]; then
+
+# Core skills (always installed)
+CORE_SKILLS=(
   "gentleman-programming/sdd-agent-team"
   "davidcastagnetoa/skills"
 )
 
-for skill_repo in "${EXTRA_SKILLS[@]}"; do
+for skill_repo in "${CORE_SKILLS[@]}"; do
   skill_name=$(basename "$skill_repo")
   echo -e "  ${CYAN}→${NC} Instalando skill: $skill_name..."
   if claude skill install "github:$skill_repo" 2>/dev/null; then
@@ -199,12 +211,31 @@ for skill_repo in "${EXTRA_SKILLS[@]}"; do
   fi
 done
 
+# Optional skills (only with --optional)
+if [ "$INSTALL_OPTIONAL" = true ]; then
+  OPTIONAL_SKILLS=(
+    "vercel-labs/agent-skills"
+    "shadcn-ui/ui"
+  )
+
+  echo ""
+  print_info "Instalando skills opcionales (--optional)..."
+  for skill_repo in "${OPTIONAL_SKILLS[@]}"; do
+    skill_name=$(basename "$skill_repo")
+    echo -e "  ${CYAN}→${NC} Instalando skill: $skill_name..."
+    if claude skill install "github:$skill_repo" 2>/dev/null; then
+      print_ok "$skill_name instalado (opcional)"
+    else
+      print_info "$skill_name ya instalado o no disponible"
+    fi
+  done
+fi
+
 # Plugins
 echo ""
 print_info "Instalando plugins de Claude Code..."
 
 PLUGINS=(
-  "claude-powerline@claude-powerline"
   "engram@engram"
   "frontend-design@claude-plugins-official"
   "code-review@claude-plugins-official"
@@ -220,6 +251,25 @@ for plugin in "${PLUGINS[@]}"; do
     print_info "$plugin_name ya instalado o no disponible"
   fi
 done
+
+# claude-powerline: conditional (only if Claude Code is present)
+echo -e "  ${CYAN}→${NC} Plugin: claude-powerline..."
+if claude plugin install "claude-powerline@claude-powerline" 2>/dev/null; then
+  print_ok "claude-powerline instalado"
+else
+  print_info "claude-powerline ya instalado o no disponible"
+fi
+
+else
+  print_warn "Claude Code CLI no encontrado. Saltando skills y plugins."
+  print_info "Instala Claude Code y ejecuta este instalador de nuevo para obtener skills y plugins."
+  echo ""
+  echo -e "  ${YELLOW}Skills omitidas:${NC} sdd-agent-team, davidcastagnetoa/skills"
+  if [ "$INSTALL_OPTIONAL" = true ]; then
+    echo -e "  ${YELLOW}Skills opcionales omitidas:${NC} vercel-labs/agent-skills, shadcn-ui/ui"
+  fi
+  echo -e "  ${YELLOW}Plugins omitidos:${NC} engram, frontend-design, code-review, code-simplifier, claude-powerline"
+fi
 
 # ═══════════════════════════════════════════
 # PASO 6: Inicializar repositorio git
@@ -263,11 +313,17 @@ echo ""
 echo -e "  ${BOLD}Próximos pasos:${NC}"
 echo -e "    1. Personalizá context/guidelines.md con el stack de tu proyecto"
 echo -e "    2. Completá context/user_context.md con tu perfil"
-echo -e "    3. Adaptá templates/CLAUDE.md y templates/AGENTS.md a tu proyecto"
-echo -e "    4. Abrí Claude Code: cd $TARGET_DIR && claude"
-echo -e "    5. Probá con: '¿qué skills tengo disponibles?'"
+echo -e "    3. Completá context/business_logic.md con la lógica de negocio de tu proyecto"
+echo -e "    4. Adaptá CLAUDE.md y AGENTS.md a tu proyecto"
+echo -e "    5. Abrí Claude Code: cd $TARGET_DIR && claude"
+echo -e "    6. Probá con: '¿qué skills tengo disponibles?'"
 echo ""
 echo -e "  ${BOLD}Lee el README.md para el tutorial completo.${NC}"
+if [ "$INSTALL_OPTIONAL" = false ]; then
+  echo ""
+  echo -e "  ${CYAN}Tip:${NC} Para instalar skills opcionales (vercel-react-best-practices, shadcn),"
+  echo -e "        ejecutá: bash install.sh --optional"
+fi
 echo ""
 
 }

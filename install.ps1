@@ -2,12 +2,14 @@
 
 # stark-kit — Entorno de Desarrollo con IA, Instalador (PowerShell)
 # Uso:
-#   git clone https://github.com/thestark77/stark-kit.git; cd stark-kit; .\install.ps1 [TARGET_DIR]
+#   git clone https://github.com/thestark77/stark-kit.git; cd stark-kit; .\install.ps1 [TARGET_DIR] [-Optional]
 #
 # TARGET_DIR por defecto: directorio actual de trabajo
+# -Optional: Instala skills opcionales (vercel-react-best-practices, shadcn)
 
 param(
-  [string]$TargetDir
+  [string]$TargetDir,
+  [switch]$Optional
 )
 
 $ErrorActionPreference = "Continue"
@@ -81,16 +83,16 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 Print-Ok "git instalado"
 
 # Check claude CLI
-if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-  Print-Error "Claude Code CLI no encontrado."
+$HasClaude = $false
+if (Get-Command claude -ErrorAction SilentlyContinue) {
+  $HasClaude = $true
+  Print-Ok "Claude Code CLI instalado"
+} else {
+  Print-Warn "Claude Code CLI no encontrado."
+  Print-Warn "Se instalarán archivos de configuración, pero skills y plugins se omitirán."
+  Print-Warn "Instálalo con: npm install -g @anthropic-ai/claude-code"
   Write-Host ""
-  Write-Host "  Instala Claude Code primero:"
-  Write-Host "    npm install -g @anthropic-ai/claude-code"
-  Write-Host "    o visita: https://claude.ai/code"
-  Write-Host ""
-  exit 1
 }
-Print-Ok "Claude Code CLI instalado"
 
 # Check npm/pnpm
 $PkgMgr = $null
@@ -103,6 +105,10 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
   exit 1
 }
 Print-Ok "$PkgMgr disponible"
+
+if ($InstallOptional) {
+  Print-Info "Se instalarán skills opcionales (-Optional)"
+}
 
 # ═══════════════════════════════════════════
 # STEP 1: Directory validation
@@ -166,7 +172,7 @@ if (Test-Path $settingsSrc) {
 
 # Copy context files
 $contextDir = Join-Path $TargetDir "context"
-foreach ($f in @("guidelines.md", "user_context.md")) {
+foreach ($f in @("guidelines.md", "business_logic.md", "user_context.md")) {
   $src = Join-Path $ScriptDir "templates/context/$f"
   if (Test-Path $src) {
     Copy-Item -Path $src -Destination (Join-Path $contextDir $f) -Force
@@ -189,7 +195,7 @@ Print-Info "Estructura base creada. Adaptala a las necesidades de tu proyecto."
 # ═══════════════════════════════════════════
 # STEP 4: Install autoSDD
 # ═══════════════════════════════════════════
-Print-Step 4 "Instalando autoSDD v5.3..."
+Print-Step 4 "Instalando autoSDD v6.1..."
 Print-Info "Esto abrirá el instalador interactivo de autoSDD."
 Print-Info "Selecciona los agentes que uses (al menos claude-code)."
 Write-Host ""
@@ -219,15 +225,16 @@ try {
 # STEP 5: Install additional skills & plugins
 # ═══════════════════════════════════════════
 Print-Step 5 "Instalando skills y plugins adicionales..."
-$ExtraSkills = @(
-  "JuliusBrussee/caveman"
-  "vercel-labs/agent-skills"
-  "shadcn-ui/ui"
+
+if ($HasClaude) {
+
+# Core skills (always installed)
+$CoreSkills = @(
   "gentleman-programming/sdd-agent-team"
   "davidcastagnetoa/skills"
 )
 
-foreach ($skillRepo in $ExtraSkills) {
+foreach ($skillRepo in $CoreSkills) {
   $skillName = Split-Path -Leaf $skillRepo
   Print-Info "Instalando skill: $skillName..."
   $result = claude skill install "github:$skillRepo" 2>&1
@@ -238,12 +245,32 @@ foreach ($skillRepo in $ExtraSkills) {
   }
 }
 
+# Optional skills (only with -Optional)
+if ($InstallOptional) {
+  $OptionalSkills = @(
+    "vercel-labs/agent-skills"
+    "shadcn-ui/ui"
+  )
+
+  Write-Host ""
+  Print-Info "Instalando skills opcionales (-Optional)..."
+  foreach ($skillRepo in $OptionalSkills) {
+    $skillName = Split-Path -Leaf $skillRepo
+    Print-Info "Instalando skill: $skillName..."
+    $result = claude skill install "github:$skillRepo" 2>&1
+    if ($LASTEXITCODE -eq 0) {
+      Print-Ok "$skillName instalado (opcional)"
+    } else {
+      Print-Info "$skillName ya instalado o no disponible"
+    }
+  }
+}
+
 # Plugins
 Write-Host ""
 Print-Info "Instalando plugins de Claude Code..."
 
 $Plugins = @(
-  @{ Name = "claude-powerline"; Id = "claude-powerline@claude-powerline" }
   @{ Name = "engram";           Id = "engram@engram" }
   @{ Name = "frontend-design";  Id = "frontend-design@claude-plugins-official" }
   @{ Name = "code-review";      Id = "code-review@claude-plugins-official" }
@@ -258,6 +285,26 @@ foreach ($plugin in $Plugins) {
   } else {
     Print-Info "$($plugin.Name) ya instalado o no disponible"
   }
+}
+
+# claude-powerline: conditional (only if Claude Code is present)
+Print-Info "Plugin: claude-powerline..."
+$result = claude plugin install "claude-powerline@claude-powerline" 2>&1
+if ($LASTEXITCODE -eq 0) {
+  Print-Ok "claude-powerline instalado"
+} else {
+  Print-Info "claude-powerline ya instalado o no disponible"
+}
+
+} else {
+  Print-Warn "Claude Code CLI no encontrado. Saltando skills y plugins."
+  Print-Info "Instala Claude Code y ejecuta este instalador de nuevo para obtener skills y plugins."
+  Write-Host ""
+  Write-Host "  Skills omitidas: sdd-agent-team, davidcastagnetoa/skills" -ForegroundColor Yellow
+  if ($InstallOptional) {
+    Write-Host "  Skills opcionales omitidas: vercel-labs/agent-skills, shadcn-ui/ui" -ForegroundColor Yellow
+  }
+  Write-Host "  Plugins omitidos: engram, frontend-design, code-review, code-simplifier, claude-powerline" -ForegroundColor Yellow
 }
 
 # ═══════════════════════════════════════════
@@ -308,9 +355,15 @@ Write-Host ""
 Write-Host "  Próximos pasos:" -ForegroundColor White
 Write-Host "    1. Personalizá context/guidelines.md con el stack de tu proyecto"
 Write-Host "    2. Completá context/user_context.md con tu perfil"
-Write-Host "    3. Adaptá CLAUDE.md y AGENTS.md a tu proyecto"
-Write-Host "    4. Abrí Claude Code: cd $TargetDir && claude"
-Write-Host "    5. Probá con: '¿qué skills tengo disponibles?'"
+Write-Host "    3. Completá context/business_logic.md con la lógica de negocio de tu proyecto"
+Write-Host "    4. Adaptá CLAUDE.md y AGENTS.md a tu proyecto"
+Write-Host "    5. Abrí Claude Code: cd $TargetDir && claude"
+Write-Host "    6. Probá con: '¿qué skills tengo disponibles?'"
 Write-Host ""
 Write-Host "  Lee el README.md para el tutorial completo." -ForegroundColor White
+if (-not $InstallOptional) {
+  Write-Host ""
+  Write-Host "  Tip: Para instalar skills opcionales (vercel-react-best-practices, shadcn)," -ForegroundColor Cyan
+  Write-Host "       ejecutá: .\install.ps1 -Optional" -ForegroundColor Cyan
+}
 Write-Host ""
