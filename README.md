@@ -534,7 +534,7 @@ stark-kit también funciona con [OpenCode](https://opencode.ai), el agente de IA
 
 OpenCode lee `opencode.md` (instrucciones del pipeline autoSDD adaptadas) y `opencode.json` (asignación de modelos). No necesita hooks — las reglas se inyectan en el system prompt.
 
-Nota: Engram MCP no está disponible en OpenCode. autoSDD usa caché de conocimiento basado en archivos en `context/appVersions/knowledge/`.
+El instalador de autoSDD configura Engram MCP globalmente para OpenCode (`~/.config/opencode/opencode.json`) usando el mismo wrapper de embeddings que Claude Code, por lo que la búsqueda semántica funciona igual en ambos agentes.
 
 ---
 
