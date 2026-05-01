@@ -1,7 +1,18 @@
 # autoSDD v6.1 — OpenCode Instructions
 
-> This file is read by OpenCode via contextPaths. It adapts the autoSDD pipeline for OpenCode's tooling.
-> Claude Code CLI uses hooks (.claude/settings.json) — this file is only for OpenCode.
+> This file is the ONLY instruction file OpenCode reads (via contextPaths).
+> Do NOT read CLAUDE.md — it contains Claude Code-specific instructions (hooks, Agent() calls, Engram MCP) that are incompatible with OpenCode.
+> This file adapts the autoSDD pipeline for OpenCode's tooling.
+
+---
+
+## Project Info
+
+@AGENTS.md
+
+See the project's AGENTS.md for agent definitions and shared rules.
+See `context/guidelines.md` for technical conventions.
+See `context/user_context.md` for user preferences.
 
 ---
 
@@ -83,21 +94,40 @@ ALL prompts go through autoSDD unless `[raw]`, `[no-sdd]`, or `skip autosdd`.
 
 ### Model Strategy (OpenCode)
 
+OpenCode has 4 agent slots. Model assignments come from `context/models.json`:
+
+- **coder** (main session): Orchestrator — coordinates, delegates, makes decisions
+- **task** (sub-agent): Context scout, implementation — reads code, executes tasks
+- **title** (session titles): Cheapest model, 80 token limit
+- **summarizer** (compaction): Saves conversation state before compaction
+
 When using Task tool, prefer:
 - **explore** subagent: For code exploration and quick searches
 - **general** subagent: For implementation, multi-step tasks
-
-The orchestrator (main session) coordinates and delegates.
 
 ---
 
 ## Knowledge Caching (replaces Engram MCP)
 
-Engram MCP is NOT available in OpenCode. Use file-based knowledge caching instead:
+Engram MCP (`mem_save`, `mem_search`, `mem_context()`) is NOT available in OpenCode. Use file-based knowledge caching instead:
 
 - **Read**: Before reading 4+ files, check `context/appVersions/` for cached maps
 - **Write**: After understanding a flow, save a 20-line map to `context/appVersions/knowledge/`
 - **Format**: `Purpose → Files → Flow (step1→step2→step3) → Key decisions → Gotchas`
+
+---
+
+## What's Different from Claude Code
+
+| Feature | Claude Code | OpenCode |
+|---------|------------|----------|
+| Hooks | `.claude/settings.json` | None (enforced in this file) |
+| Sub-agents | `Agent({ model: "haiku" })` | Task tool with subagent_type |
+| Memory | Engram MCP (`mem_save/search/context`) | File-based `context/appVersions/knowledge/` |
+| Model switching | `model: "opus"/"sonnet"/"haiku"` | `context/models.json` presets → `opencode.json` agents |
+| Pre-compaction save | PreCompact hook | "Before Context Compaction" section above (manual) |
+| Post-sub-agent check | SubagentStop hook | "After Every Task" section above (manual) |
+| Orchestrator reminder | UserPromptSubmit hook | "On Every User Prompt" section above (manual) |
 
 ---
 
@@ -107,5 +137,6 @@ Engram MCP is NOT available in OpenCode. Use file-based knowledge caching instea
 2. **VERSION FIRST** — before planning, create `context/appVersions/vX.Y.Z/` + save `original_prompt.md`
 3. **PROGRESS.md is sacred** — update at every step
 4. **Feedback after every task** — ask user ≥1 strategic question
-5. **Read CLAUDE.md and AGENTS.md** for project-specific conventions
+5. **Read AGENTS.md** for project-specific agent definitions and shared rules
 6. **Read context/guidelines.md** for technical rules before coding
+7. **Do NOT read CLAUDE.md** — it contains Claude Code-specific hooks and Agent() calls incompatible with OpenCode

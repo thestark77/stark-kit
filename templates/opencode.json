@@ -4,7 +4,6 @@
     "directory": ".opencode"
   },
   "contextPaths": [
-    "CLAUDE.md",
     "opencode.md",
     "AGENTS.md"
   ],
