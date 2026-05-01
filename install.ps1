@@ -195,6 +195,15 @@ if (Test-Path $settingsSrc) {
   Print-Ok ".claude/settings.json (hooks) configurado"
 }
 
+# Copy opencode.json and opencode.md (OpenCode CLI config)
+foreach ($f in @("opencode.json", "opencode.md")) {
+  $src = Join-Path $ScriptDir "templates/$f"
+  if (Test-Path $src) {
+    Copy-Item -Path $src -Destination (Join-Path $TargetDir $f) -Force
+    Print-Ok "$f copiado (OpenCode compatible)"
+  }
+}
+
 # Copy context files
 $contextDir = Join-Path $TargetDir "context"
 foreach ($f in @("guidelines.md", "business_logic.md", "user_context.md")) {
@@ -342,7 +351,7 @@ Push-Location $TargetDir
 # Init root git repo if not exists
 if (-not (Test-Path ".git")) {
   git init -q
-  git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json 2>$null
+  git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json opencode.json opencode.md 2>$null
   git commit -q -m "init: stark-kit setup"
   Print-Ok "Repositorio raíz inicializado"
 } else {
@@ -383,6 +392,7 @@ Write-Host "    2. Completá context/user_context.md con tu perfil"
 Write-Host "    3. Completá context/business_logic.md con la lógica de negocio de tu proyecto"
 Write-Host "    4. Adaptá CLAUDE.md y AGENTS.md a tu proyecto"
 Write-Host "    5. Abrí Claude Code: cd $TargetDir && claude"
+Write-Host "       O OpenCode: cd $TargetDir && opencode"
 Write-Host "    6. Probá con: '¿qué skills tengo disponibles?'"
 Write-Host ""
 Write-Host "  Lee el README.md para el tutorial completo." -ForegroundColor White

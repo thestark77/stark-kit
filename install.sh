@@ -159,6 +159,14 @@ if [ -f "$SCRIPT_DIR/templates/.claude/settings.json" ]; then
   print_ok ".claude/settings.json (hooks) configurado"
 fi
 
+# Copy opencode.json and opencode.md (OpenCode CLI config)
+for f in opencode.json opencode.md; do
+  if [ -f "$SCRIPT_DIR/templates/$f" ]; then
+    cp "$SCRIPT_DIR/templates/$f" "$TARGET_DIR/$f"
+    print_ok "$f copiado (OpenCode compatible)"
+  fi
+done
+
 # Copiar archivos de contexto
 for f in guidelines.md business_logic.md user_context.md; do
   if [ -f "$SCRIPT_DIR/templates/context/$f" ]; then
@@ -295,7 +303,7 @@ cd "$TARGET_DIR" || return 1
 
 if [ ! -d ".git" ]; then
   git init -q
-  git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json 2>/dev/null
+  git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json opencode.json opencode.md 2>/dev/null
   git commit -q -m "init: stark-kit setup"
   print_ok "Repositorio git inicializado"
 else
@@ -331,6 +339,7 @@ echo -e "    2. Completá context/user_context.md con tu perfil"
 echo -e "    3. Completá context/business_logic.md con la lógica de negocio de tu proyecto"
 echo -e "    4. Adaptá CLAUDE.md y AGENTS.md a tu proyecto"
 echo -e "    5. Abrí Claude Code: cd $TARGET_DIR && claude"
+echo -e "       O OpenCode: cd $TARGET_DIR && opencode"
 echo -e "    6. Probá con: '¿qué skills tengo disponibles?'"
 echo ""
 echo -e "  ${BOLD}Lee el README.md para el tutorial completo.${NC}"

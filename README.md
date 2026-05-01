@@ -2,6 +2,7 @@
   <img src="https://img.shields.io/badge/stark--kit-v2.0-blue?style=for-the-badge" alt="version" />
   <img src="https://img.shields.io/badge/autoSDD-v6.1-green?style=for-the-badge" alt="autoSDD" />
   <img src="https://img.shields.io/badge/skills-16%2B-purple?style=for-the-badge" alt="skills" />
+  <img src="https://img.shields.io/badge/OpenCode-Compatible-green?style=for-the-badge" alt="OpenCode" />
   <img src="https://img.shields.io/badge/plugins-4%2B-orange?style=for-the-badge" alt="plugins" />
 </p>
 
@@ -70,6 +71,7 @@ Existen dos versiones del kit:
 | 2 | **Git** | `git --version` | [git-scm.com/downloads](https://git-scm.com/downloads) |
 | 3 | **Claude Code CLI** | `claude --version` | `npm install -g @anthropic-ai/claude-code` |
 | 4 | **pnpm** (recomendado) | `pnpm --version` | `npm install -g pnpm` |
+| 5 | **OpenCode CLI** (opcional) | `opencode --version` | [opencode.ai](https://opencode.ai) |
 
 > Si no tienes Claude Code CLI, el instalador solo copiara los archivos de configuracion. Skills y plugins se omitiran hasta que lo instales.
 
@@ -488,6 +490,9 @@ cd tu-proyecto
 # 2. Arranca Claude Code
 claude
 
+# O OpenCode
+opencode
+
 # 3. autoSDD se activa automaticamente
 #    La IA ya conoce las convenciones y tiene acceso a los skills.
 
@@ -515,6 +520,21 @@ claude
 | `skip autosdd` (prefijo) | Igual que `[raw]` |
 | `FEEDBACK DE USO` | Reporta problemas/mejoras sobre las herramientas de IA |
 | `DESCUBRIMIENTO` | Documenta algo importante que descubriste sobre el proyecto |
+
+---
+
+## Como usar OpenCode con este setup
+
+stark-kit también funciona con [OpenCode](https://opencode.ai), el agente de IA de código abierto. La configuración es automática:
+
+1. Instalá OpenCode: seguís las instrucciones en [opencode.ai](https://opencode.ai)
+2. Navegá a tu proyecto: `cd /ruta/a/tu/proyecto`
+3. Ejecutá: `opencode`
+4. Seleccioná un modelo y empezá a chatear
+
+OpenCode lee `opencode.md` (instrucciones del pipeline autoSDD adaptadas) y `opencode.json` (asignación de modelos). No necesita hooks — las reglas se inyectan en el system prompt.
+
+Nota: Engram MCP no está disponible en OpenCode. autoSDD usa caché de conocimiento basado en archivos en `context/appVersions/knowledge/`.
 
 ---
 

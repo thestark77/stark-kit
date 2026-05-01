@@ -17,6 +17,9 @@ build/
 .claude/*.bak
 .playwright-cli/
 
+# OpenCode artifacts
+.opencode/
+
 # IDE / AI tool configs (por máquina, no compartir)
 .vscode/
 .cursor/
