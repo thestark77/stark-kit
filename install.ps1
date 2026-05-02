@@ -2,16 +2,18 @@
 
 # stark-kit — Entorno de Desarrollo con IA, Instalador (PowerShell)
 # Uso:
-#   git clone https://github.com/thestark77/stark-kit.git; cd stark-kit; .\install.ps1 [TARGET_DIR] [-Optional] [-Yes]
+#   git clone https://github.com/thestark77/stark-kit.git; cd stark-kit; .\install.ps1 [TARGET_DIR] [-Optional] [-Yes] [-SkillsOnly]
 #
 # TARGET_DIR por defecto: directorio actual de trabajo
-# -Optional: Instala skills opcionales (vercel-react-best-practices, shadcn)
-# -Yes:      No pedir confirmación (modo automático, para scripts que llaman a stark-kit)
+# -Optional:    Instala skills opcionales (vercel-react-best-practices, shadcn)
+# -Yes:         No pedir confirmación (modo automático, para scripts que llaman a stark-kit)
+# -SkillsOnly:  Solo actualiza autoSDD, skills y plugins sin tocar archivos del proyecto
 
 param(
   [string]$TargetDir,
   [switch]$Optional,
-  [switch]$Yes
+  [switch]$Yes,
+  [switch]$SkillsOnly
 )
 
 $ErrorActionPreference = "Continue"
@@ -114,44 +116,82 @@ if ($InstallOptional) {
 }
 
 # ═══════════════════════════════════════════
-# STEP 1: Directory validation
+# STEP 1: Directory validation + install mode
 # ═══════════════════════════════════════════
 Print-Step 1 "Preparando directorio de destino: $TargetDir"
 
 $UpdateMode = $false
+$SkillsOnlyMode = $false
 
-if (Test-Path $TargetDir) {
-  $existingItems = Get-ChildItem -Path $TargetDir -Force |
-    Where-Object { $_.Name -ne '.git' }
+# Resolve SkillsOnly mode from flag
+if ($SkillsOnly.IsPresent) {
+  $SkillsOnlyMode = $true
+}
 
-  if ($existingItems.Count -gt 0) {
+# Detect existing installation (CLAUDE.md is the marker)
+$existingClaudeMd = Join-Path $TargetDir "CLAUDE.md"
+$HasExistingInstall = (Test-Path $TargetDir) -and (Test-Path $existingClaudeMd)
+
+if ($HasExistingInstall) {
+  $UpdateMode = $true
+
+  if (-not $AutoYes -and -not $SkillsOnlyMode) {
+    # Show interactive menu
     Write-Host ""
-    Print-Warn "El directorio ya contiene archivos."
-    Print-Warn "Se actualizarán los archivos de configuración (CLAUDE.md, context/, .claude/)."
-    Print-Warn "NO se tocarán las carpetas de repositorios existentes (backend/, frontend/, admin/, bemovil2-proxy/)."
+    Write-Host "  ┌─────────────────────────────────────────────────┐" -ForegroundColor Cyan
+    Write-Host "  │  " -ForegroundColor Cyan -NoNewline
+    Write-Host "Instalación existente detectada." -NoNewline -ForegroundColor White
+    Write-Host "               │" -ForegroundColor Cyan
+    Write-Host "  │                                                 │" -ForegroundColor Cyan
+    Write-Host "  │  " -ForegroundColor Cyan -NoNewline
+    Write-Host "[1]" -NoNewline -ForegroundColor White
+    Write-Host " Instalación completa" -NoNewline
+    Write-Host "                       │" -ForegroundColor Cyan
+    Write-Host "  │      Sobreescribe archivos de configuración     │" -ForegroundColor Cyan
+    Write-Host "  │      (CLAUDE.md, context/, .claude/, etc.)      │" -ForegroundColor Cyan
+    Write-Host "  │                                                 │" -ForegroundColor Cyan
+    Write-Host "  │  " -ForegroundColor Cyan -NoNewline
+    Write-Host "[2]" -NoNewline -ForegroundColor White
+    Write-Host " Solo skills y plugins" -NoNewline
+    Write-Host "                      │" -ForegroundColor Cyan
+    Write-Host "  │      Actualiza autoSDD, skills y plugins        │" -ForegroundColor Cyan
+    Write-Host "  │      sin tocar archivos del proyecto            │" -ForegroundColor Cyan
+    Write-Host "  └─────────────────────────────────────────────────┘" -ForegroundColor Cyan
     Write-Host ""
 
-    if (-not $AutoYes) {
-      $confirm = Read-Host "  ¿Continuar con la actualización? [y/N]"
-      if ($confirm -notmatch '^[Yy]$') {
-        Write-Host "  Instalación cancelada."
+    $choice = Read-Host "  Seleccioná (1/2)"
+
+    switch ($choice) {
+      "1" { <# full install, default #> }
+      "2" { $SkillsOnlyMode = $true }
+      ""  { <# empty = default = full install #> }
+      default {
+        Write-Host "  Instalación cancelada." -ForegroundColor Yellow
         exit 0
       }
     }
-
-    $UpdateMode = $true
   }
+  # If -Yes is set, defaults to full install (SkillsOnlyMode stays $false unless -SkillsOnly was set)
 }
 
 if (-not (Test-Path $TargetDir)) {
   New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
 }
-Print-Ok "Directorio listo: $TargetDir"
+
+if ($SkillsOnlyMode) {
+  Print-Ok "Directorio listo: $TargetDir (modo skills-only)"
+} else {
+  Print-Ok "Directorio listo: $TargetDir"
+}
 
 # ═══════════════════════════════════════════
 # STEP 2: Copy template files
 # ═══════════════════════════════════════════
 Print-Step 2 "Copiando archivos de configuración..."
+
+if ($SkillsOnlyMode) {
+  Print-Info "Modo skills-only — archivos de configuración no modificados"
+} else {
 
 # Create directory structure
 $contextVersionsDir = Join-Path $TargetDir "context/appVersions"
@@ -246,10 +286,16 @@ foreach ($f in @("guidelines.md", "business_logic.md", "user_context.md")) {
   }
 }
 
+} # end if (-not $SkillsOnlyMode)
+
 # ═══════════════════════════════════════════
 # STEP 3: Create base project structure
 # ═══════════════════════════════════════════
 Print-Step 3 "Creando estructura base del proyecto..."
+
+if ($SkillsOnlyMode) {
+  Print-Info "Modo skills-only — estructura del proyecto no modificada"
+} else {
 
 New-Item -ItemType Directory -Path (Join-Path $TargetDir "src") -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $TargetDir "tests") -Force | Out-Null
@@ -257,6 +303,8 @@ New-Item -ItemType Directory -Path (Join-Path $TargetDir "tests") -Force | Out-N
 Print-Ok "src/ creado"
 Print-Ok "tests/ creado"
 Print-Info "Estructura base creada. Adaptala a las necesidades de tu proyecto."
+
+} # end if (-not $SkillsOnlyMode)
 
 # ═══════════════════════════════════════════
 # STEP 4: Install autoSDD
@@ -380,19 +428,23 @@ Print-Step 6 "Finalizando configuración..."
 
 Push-Location $TargetDir
 
-# Init root git repo if not exists
-if (-not (Test-Path ".git")) {
-  git init -q
-  git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json opencode.json opencode.md 2>$null
-  git commit -q -m "init: stark-kit setup"
-  Print-Ok "Repositorio raíz inicializado"
-} else {
-  Print-Info "Repositorio raíz ya existe"
-}
+if (-not $SkillsOnlyMode) {
+  # Init root git repo if not exists
+  if (-not (Test-Path ".git")) {
+    git init -q
+    git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json opencode.json opencode.md 2>$null
+    git commit -q -m "init: stark-kit setup"
+    Print-Ok "Repositorio raíz inicializado"
+  } else {
+    Print-Info "Repositorio raíz ya existe"
+  }
 
-# Create appVersions/v0.1.0
-$v010Dir = Join-Path $TargetDir "context/appVersions/v0.1.0"
-New-Item -ItemType Directory -Path $v010Dir -Force | Out-Null
+  # Create appVersions/v0.1.0
+  $v010Dir = Join-Path $TargetDir "context/appVersions/v0.1.0"
+  New-Item -ItemType Directory -Path $v010Dir -Force | Out-Null
+} else {
+  Print-Info "Modo skills-only — repositorio git no modificado"
+}
 
 Pop-Location
 
@@ -406,6 +458,10 @@ Write-Host "  ══════════════════════
 Write-Host ""
 Write-Host "  Directorio: " -NoNewline -ForegroundColor White
 Write-Host $TargetDir
+if ($SkillsOnlyMode) {
+  Write-Host "  Modo: " -NoNewline -ForegroundColor White
+  Write-Host "Solo skills y plugins (archivos de proyecto no modificados)"
+}
 Write-Host ""
 
 if ($Warnings.Count -gt 0) {

@@ -3,11 +3,12 @@ set -uo pipefail
 
 # stark-kit — Entorno de Desarrollo con IA, Instalador
 # Uso:
-#   git clone https://github.com/thestark77/stark-kit.git && cd stark-kit && bash install.sh [TARGET_DIR] [--optional] [--yes]
+#   git clone https://github.com/thestark77/stark-kit.git && cd stark-kit && bash install.sh [TARGET_DIR] [--optional] [--yes] [--skills-only]
 #
 # TARGET_DIR por defecto: directorio actual de trabajo del usuario (o nombre provisto)
-# --optional: Instala skills opcionales (vercel-react-best-practices, shadcn)
-# --yes/-y:  No pedir confirmación (modo automático, para scripts que llaman a stark-kit)
+# --optional:     Instala skills opcionales (vercel-react-best-practices, shadcn)
+# --yes/-y:       No pedir confirmación (modo automático, para scripts que llaman a stark-kit)
+# --skills-only:  Solo actualiza autoSDD, skills y plugins sin tocar archivos del proyecto
 
 _starkkit_install() {
 
@@ -16,11 +17,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Parse arguments
 INSTALL_OPTIONAL=false
 AUTO_YES=false
+SKILLS_ONLY=false
 TARGET_DIR=""
 for arg in "$@"; do
   case "$arg" in
     --optional) INSTALL_OPTIONAL=true ;;
     --yes|-y) AUTO_YES=true ;;
+    --skills-only) SKILLS_ONLY=true ;;
     *) TARGET_DIR="$arg" ;;
   esac
 done
@@ -96,30 +99,46 @@ print_step 1 "Preparando directorio de destino: ${TARGET_DIR}"
 
 UPDATE_MODE=false
 
-if [ -d "$TARGET_DIR" ]; then
-  file_count=$(find "$TARGET_DIR" -maxdepth 1 -not -name '.' -not -name '..' -not -name '.git' | wc -l)
+if [ -f "$TARGET_DIR/CLAUDE.md" ]; then
+  # Existing stark-kit installation detected
+  UPDATE_MODE=true
 
-  if [ "$file_count" -gt 0 ]; then
+  if [ "$SKILLS_ONLY" = true ]; then
+    # --skills-only flag: skip menu, go directly to skills-only mode
+    print_info "Instalación existente detectada. Modo --skills-only activado."
+  elif [ "$AUTO_YES" = true ]; then
+    # --yes flag: skip menu, default to full install
+    print_info "Instalación existente detectada. Modo completo (--yes)."
+  else
+    # Interactive menu
     echo ""
-    print_warn "El directorio ya contiene archivos."
-    print_warn "Se actualizarán los archivos de configuración (CLAUDE.md, context/, .claude/)."
-    print_warn "NO se tocarán carpetas de código existentes."
+    echo -e "${CYAN}  ┌─────────────────────────────────────────────────┐${NC}"
+    echo -e "${CYAN}  │${NC}  Instalación existente detectada.               ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}                                                 ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}  ${BOLD}[1] Instalación completa${NC}                       ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}      Sobreescribe archivos de configuración     ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}      (CLAUDE.md, context/, .claude/, etc.)      ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}                                                 ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}  ${BOLD}[2] Solo skills y plugins${NC}                      ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}      Actualiza autoSDD, skills y plugins        ${CYAN}│${NC}"
+    echo -e "${CYAN}  │${NC}      sin tocar archivos del proyecto            ${CYAN}│${NC}"
+    echo -e "${CYAN}  └─────────────────────────────────────────────────┘${NC}"
     echo ""
 
-    if [[ "$AUTO_YES" == "true" ]] || [[ -r /dev/tty ]]; then
-      if [[ "$AUTO_YES" != "true" ]]; then
-        read -rp "  ¿Continuar con la actualización? [y/N]: " confirm </dev/tty || confirm=""
-      fi
+    if [[ -r /dev/tty ]]; then
+      read -rp "  Seleccioná (1/2): " choice </dev/tty || choice=""
     else
-      confirm="y"
+      choice="1"
     fi
 
-    if [[ "$AUTO_YES" != "true" ]] && [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-      echo "  Instalación cancelada."
-      return 0
-    fi
-
-    UPDATE_MODE=true
+    case "$choice" in
+      1|"") ;; # Full install, SKILLS_ONLY stays false
+      2) SKILLS_ONLY=true ;;
+      *)
+        echo "  Instalación cancelada."
+        return 0
+        ;;
+    esac
   fi
 fi
 
@@ -131,94 +150,104 @@ print_ok "Directorio listo: $TARGET_DIR"
 # ═══════════════════════════════════════════
 print_step 2 "Copiando archivos de configuración..."
 
-# Crear estructura de directorios
-mkdir -p "$TARGET_DIR/context/appVersions"
-mkdir -p "$TARGET_DIR/.claude"
-
-# Copiar archivos raíz
-for f in CLAUDE.md AGENTS.md .gitignore; do
-  if [ -f "$SCRIPT_DIR/templates/$f" ]; then
-    cp "$SCRIPT_DIR/templates/$f" "$TARGET_DIR/$f"
-    print_ok "$f copiado"
-  fi
-done
-
-# PROGRESS.md: only copy if it doesn't exist or is still the template default (5 lines or less)
-if [ ! -f "$TARGET_DIR/PROGRESS.md" ] || [ "$(wc -l < "$TARGET_DIR/PROGRESS.md" 2>/dev/null)" -le 5 ]; then
-  if [ -f "$SCRIPT_DIR/templates/PROGRESS.md" ]; then
-    cp "$SCRIPT_DIR/templates/PROGRESS.md" "$TARGET_DIR/PROGRESS.md"
-    print_ok "PROGRESS.md copiado"
-  fi
+if [ "$SKILLS_ONLY" = true ]; then
+  print_info "Modo skills-only — archivos de configuración no modificados"
 else
-  print_info "PROGRESS.md ya tiene contenido real — no se sobrescribe"
-fi
 
-# Copiar .claude/settings.json (hooks del proyecto)
-if [ -f "$SCRIPT_DIR/templates/.claude/settings.json" ]; then
-  cp "$SCRIPT_DIR/templates/.claude/settings.json" "$TARGET_DIR/.claude/settings.json"
-  print_ok ".claude/settings.json (hooks) configurado"
-fi
+  # Crear estructura de directorios
+  mkdir -p "$TARGET_DIR/context/appVersions"
+  mkdir -p "$TARGET_DIR/.claude"
 
-# Copy opencode.json and opencode.md (OpenCode CLI config)
-for f in opencode.json opencode.md; do
-  if [ -f "$SCRIPT_DIR/templates/$f" ]; then
-    cp "$SCRIPT_DIR/templates/$f" "$TARGET_DIR/$f"
-    print_ok "$f copiado (OpenCode compatible)"
+  # Copiar archivos raíz
+  for f in CLAUDE.md AGENTS.md .gitignore; do
+    if [ -f "$SCRIPT_DIR/templates/$f" ]; then
+      cp "$SCRIPT_DIR/templates/$f" "$TARGET_DIR/$f"
+      print_ok "$f copiado"
+    fi
+  done
+
+  # PROGRESS.md: only copy if it doesn't exist or is still the template default (5 lines or less)
+  if [ ! -f "$TARGET_DIR/PROGRESS.md" ] || [ "$(wc -l < "$TARGET_DIR/PROGRESS.md" 2>/dev/null)" -le 5 ]; then
+    if [ -f "$SCRIPT_DIR/templates/PROGRESS.md" ]; then
+      cp "$SCRIPT_DIR/templates/PROGRESS.md" "$TARGET_DIR/PROGRESS.md"
+      print_ok "PROGRESS.md copiado"
+    fi
+  else
+    print_info "PROGRESS.md ya tiene contenido real — no se sobrescribe"
   fi
-done
 
-# ── Detect available AI agents ──────────────────────────────────
-echo ""
-print_step "" "Detectando agente de IA..."
-HAS_CLAUDE=false
-HAS_OPENCODE=false
-
-if command -v claude &>/dev/null; then
-  HAS_CLAUDE=true
-  print_ok "Claude Code CLI detectado"
-else
-  print_info "Claude Code CLI no encontrado"
-fi
-
-if command -v opencode &>/dev/null; then
-  HAS_OPENCODE=true
-  print_ok "OpenCode CLI detectado"
-else
-  print_info "OpenCode CLI no encontrado (instalar desde opencode.ai)"
-fi
-
-if $HAS_CLAUDE && $HAS_OPENCODE; then
-  print_ok "Ambos agentes detectados — configuraciones instaladas para ambos (sin conflictos)"
-elif $HAS_CLAUDE; then
-  print_ok "Usando Claude Code CLI — hooks en .claude/settings.json activos"
-elif $HAS_OPENCODE; then
-  print_ok "Usando OpenCode — instrucciones en opencode.md activas (no necesita hooks)"
-else
-  print_warn "Ningún agente de IA detectado. Instalá Claude Code CLI u OpenCode."
-  print_info "  Claude Code: npm install -g @anthropic-ai/claude-code"
-  print_info "  OpenCode:    ver https://opencode.ai"
-fi
-
-# Copiar archivos de contexto
-for f in guidelines.md business_logic.md user_context.md; do
-  if [ -f "$SCRIPT_DIR/templates/context/$f" ]; then
-    cp "$SCRIPT_DIR/templates/context/$f" "$TARGET_DIR/context/$f"
-    print_ok "context/$f copiado"
+  # Copiar .claude/settings.json (hooks del proyecto)
+  if [ -f "$SCRIPT_DIR/templates/.claude/settings.json" ]; then
+    cp "$SCRIPT_DIR/templates/.claude/settings.json" "$TARGET_DIR/.claude/settings.json"
+    print_ok ".claude/settings.json (hooks) configurado"
   fi
-done
+
+  # Copy opencode.json and opencode.md (OpenCode CLI config)
+  for f in opencode.json opencode.md; do
+    if [ -f "$SCRIPT_DIR/templates/$f" ]; then
+      cp "$SCRIPT_DIR/templates/$f" "$TARGET_DIR/$f"
+      print_ok "$f copiado (OpenCode compatible)"
+    fi
+  done
+
+  # ── Detect available AI agents ──────────────────────────────────
+  echo ""
+  print_step "" "Detectando agente de IA..."
+  HAS_CLAUDE=false
+  HAS_OPENCODE=false
+
+  if command -v claude &>/dev/null; then
+    HAS_CLAUDE=true
+    print_ok "Claude Code CLI detectado"
+  else
+    print_info "Claude Code CLI no encontrado"
+  fi
+
+  if command -v opencode &>/dev/null; then
+    HAS_OPENCODE=true
+    print_ok "OpenCode CLI detectado"
+  else
+    print_info "OpenCode CLI no encontrado (instalar desde opencode.ai)"
+  fi
+
+  if $HAS_CLAUDE && $HAS_OPENCODE; then
+    print_ok "Ambos agentes detectados — configuraciones instaladas para ambos (sin conflictos)"
+  elif $HAS_CLAUDE; then
+    print_ok "Usando Claude Code CLI — hooks en .claude/settings.json activos"
+  elif $HAS_OPENCODE; then
+    print_ok "Usando OpenCode — instrucciones en opencode.md activas (no necesita hooks)"
+  else
+    print_warn "Ningún agente de IA detectado. Instalá Claude Code CLI u OpenCode."
+    print_info "  Claude Code: npm install -g @anthropic-ai/claude-code"
+    print_info "  OpenCode:    ver https://opencode.ai"
+  fi
+
+  # Copiar archivos de contexto
+  for f in guidelines.md business_logic.md user_context.md; do
+    if [ -f "$SCRIPT_DIR/templates/context/$f" ]; then
+      cp "$SCRIPT_DIR/templates/context/$f" "$TARGET_DIR/context/$f"
+      print_ok "context/$f copiado"
+    fi
+  done
+
+fi
 
 # ═══════════════════════════════════════════
 # PASO 3: Crear estructura base del proyecto
 # ═══════════════════════════════════════════
 print_step 3 "Creando estructura base del proyecto..."
 
-# Crear directorios típicos de un proyecto (vacíos, para que el dev los llene)
-mkdir -p "$TARGET_DIR/src"
-mkdir -p "$TARGET_DIR/tests"
+if [ "$SKILLS_ONLY" = true ]; then
+  print_info "Modo skills-only — estructura del proyecto no modificada"
+else
+  # Crear directorios típicos de un proyecto (vacíos, para que el dev los llene)
+  mkdir -p "$TARGET_DIR/src"
+  mkdir -p "$TARGET_DIR/tests"
 
-print_ok "src/ creado"
-print_ok "tests/ creado"
-print_info "Estructura base creada. Adaptala a las necesidades de tu proyecto."
+  print_ok "src/ creado"
+  print_ok "tests/ creado"
+  print_info "Estructura base creada. Adaptala a las necesidades de tu proyecto."
+fi
 
 # ═══════════════════════════════════════════
 # PASO 4: Instalar autoSDD
@@ -333,17 +362,21 @@ print_step 6 "Finalizando configuración..."
 
 cd "$TARGET_DIR" || return 1
 
-if [ ! -d ".git" ]; then
-  git init -q
-  git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json opencode.json opencode.md 2>/dev/null
-  git commit -q -m "init: stark-kit setup"
-  print_ok "Repositorio git inicializado"
+if [ "$SKILLS_ONLY" = true ]; then
+  print_info "Modo skills-only — configuración del proyecto no modificada"
 else
-  print_info "Repositorio git ya existe"
-fi
+  if [ ! -d ".git" ]; then
+    git init -q
+    git add CLAUDE.md AGENTS.md .gitignore PROGRESS.md context/ .claude/settings.json opencode.json opencode.md 2>/dev/null
+    git commit -q -m "init: stark-kit setup"
+    print_ok "Repositorio git inicializado"
+  else
+    print_info "Repositorio git ya existe"
+  fi
 
-# Crear carpeta de primera versión
-mkdir -p "context/appVersions/v0.1.0"
+  # Crear carpeta de primera versión
+  mkdir -p "context/appVersions/v0.1.0"
+fi
 
 # ═══════════════════════════════════════════
 # RESUMEN
@@ -354,6 +387,9 @@ echo -e "${GREEN}${BOLD}  ¡Instalación completada!${NC}"
 echo -e "${CYAN}══════════════════════════════════════════════════════${NC}"
 echo ""
 echo -e "  ${BOLD}Directorio:${NC} $TARGET_DIR"
+if [ "$SKILLS_ONLY" = true ]; then
+  echo -e "  ${BOLD}Modo:${NC} Solo skills y plugins (archivos de proyecto no modificados)"
+fi
 echo ""
 
 if [ ${#WARNINGS[@]} -gt 0 ]; then
