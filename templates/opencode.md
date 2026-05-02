@@ -108,6 +108,22 @@ When using Task tool, prefer:
 - **general** subagent: For implementation, multi-step tasks
 - **NO polling/sleep**: OpenCode has no "Monitor" or "Background Agent" tool. NEVER use sleep loops, setInterval, or polling. Use Bash for commands and Task tool for parallel sub-agents.
 
+### autoSDD Role → OpenCode Agent Mapping
+
+Resolve the model from `context/models.json` active preset. OpenCode maps roles to agent types:
+
+| autoSDD Role | subagent_type | Model tier |
+|---|---|---|
+| context-scout | explore | cheapest (haiku-tier) |
+| version-close | explore | cheapest (haiku-tier) |
+| knowledge-update | explore | cheapest (haiku-tier) |
+| precompact-save | (compaction agent) | cheapest (haiku-tier) |
+| prompt-analyst | explore | cheapest (haiku-tier) |
+| sdd-apply, sdd-verify, sdd-* | general | default (sonnet-tier) |
+| feedback-report, knowledge-graph | general | default (sonnet-tier) |
+
+Utility/mechanical tasks use `explore` (cheaper model). Implementation tasks use `general`.
+
 ---
 
 ## Knowledge (Engram MCP with Semantic Search)
@@ -142,7 +158,7 @@ In addition to Engram, maintain `context/appVersions/knowledge/` as a secondary 
 | Feature | Claude Code | OpenCode |
 |---------|------------|----------|
 | Hooks | `.claude/settings.json` | None (enforced in this file) |
-| Sub-agents | `Agent({ model: "haiku" })` | Task tool with subagent_type |
+| Sub-agents | `Agent({ model: "{role}" })` | Task tool with subagent_type |
 | Memory | Engram MCP (`mem_save/search/context`) | Engram MCP (configured globally) — same tools, semantic search enabled |
 | Model switching | `model: "opus"/"sonnet"/"haiku"` | `context/models.json` presets → `opencode.json` agents |
 | Pre-compaction save | PreCompact hook | "Before Context Compaction" section above (manual) |
