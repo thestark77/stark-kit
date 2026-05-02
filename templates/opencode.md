@@ -165,7 +165,7 @@ OpenCode has **no** Monitor tool, Background Agent, or any polling/sleep mechani
 
 ## Core Rules
 
-1. **DELEGATE** — never write 2+ files inline. Use Task tool for delegation.
+1. **Delegation**: `sdd-orchestrator.md` is authoritative — autoSDD does NOT override or duplicate. Use Task tool for delegation.
 2. **VERSION FIRST** — before planning, create `context/appVersions/vX.Y.Z/` + save `original_prompt.md`
 3. **PROGRESS.md is sacred** — update at every step
 4. **Feedback after every task** — ask user ≥1 strategic question
