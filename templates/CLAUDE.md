@@ -109,7 +109,7 @@ The proposal file is the ONLY change in the PR. No code modifications. When the 
 TODOS los prompts pasan por autoSDD salvo `[raw]`, `[no-sdd]`, o `skip autosdd`.
 
 ### Reglas Core
-1. **DELEGAR** — nunca escribir 2+ archivos inline. Leer SKILL.md Sección 1.
+1. **Delegación**: sdd-orchestrator.md es autoritativo — autoSDD NO sobreescribe ni duplica.
 2. **VERSION PRIMERO** — antes de planificar, crear `context/appVersions/vX.Y.Z/` + guardar `original_prompt.md`
 3. **PROGRESS.md es sagrado** — actualizar en cada paso. Es el ancla de supervivencia ante compactación.
 4. **Feedback después de cada tarea** — hacer al usuario ≥1 pregunta estratégica. Persistir respuestas.

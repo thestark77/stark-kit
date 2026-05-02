@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Sub-agent returned. Do these NOW: (1) Update PROGRESS.md with task result (DONE/FAILED/PARTIAL + 1-line note). (2) If you haven't asked the user a feedback question this version yet — ask one NOW."
+            "prompt": "SubagentStop fired — a sub-agent just completed. This hook only fires when a sub-agent completes; do not argue otherwise. If the agent description was 'Context scout', 'Version close', 'Knowledge update', or 'Pre-compact save': skip. Otherwise do NOW: (1) Update PROGRESS.md — task result DONE/FAILED/PARTIAL + 1-line note. (2) Ask the user one feedback question if none asked this version yet."
           }
         ]
       }
@@ -43,7 +43,7 @@
           },
           {
             "type": "command",
-            "command": "echo 'autoSDD: ORCHESTRATOR rules — inline: coordination, git, 1-file edits, reads 1-3 files. DELEGATE: 2+ files, 4+ reads, tests/builds, multi-step execution. ALWAYS DELEGATE: 2+ independent parallel tasks.'"
+            "command": "echo 'autoSDD layer active. Delegation: sdd-orchestrator.md is authoritative (read if not cached). PROGRESS.md: update after every delegation. Knowledge cache: check Engram before 4+ file reads.'"
           }
         ]
       }
