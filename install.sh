@@ -56,6 +56,15 @@ print_info() { echo -e "  ${CYAN}→${NC} $1"; }
 TOTAL_STEPS=6
 WARNINGS=()
 
+# Helper: run CLI commands non-interactively (stdin closed, with timeout if available)
+if command -v timeout &>/dev/null; then
+  _run_cli() { timeout 30 "$@" </dev/null 2>/dev/null; }
+elif command -v gtimeout &>/dev/null; then
+  _run_cli() { gtimeout 30 "$@" </dev/null 2>/dev/null; }
+else
+  _run_cli() { "$@" </dev/null 2>/dev/null; }
+fi
+
 print_header
 
 # ═══════════════════════════════════════════
@@ -288,7 +297,7 @@ CORE_SKILLS=(
 for skill_repo in "${CORE_SKILLS[@]}"; do
   skill_name=$(basename "$skill_repo")
   echo -e "  ${CYAN}→${NC} Instalando skill: $skill_name..."
-  if claude skill install "github:$skill_repo" 2>/dev/null; then
+  if _run_cli claude skill install "github:$skill_repo"; then
     print_ok "$skill_name instalado"
   else
     print_info "$skill_name ya instalado o no disponible"
@@ -307,7 +316,7 @@ if [ "$INSTALL_OPTIONAL" = true ]; then
   for skill_repo in "${OPTIONAL_SKILLS[@]}"; do
     skill_name=$(basename "$skill_repo")
     echo -e "  ${CYAN}→${NC} Instalando skill: $skill_name..."
-    if claude skill install "github:$skill_repo" 2>/dev/null; then
+    if _run_cli claude skill install "github:$skill_repo"; then
       print_ok "$skill_name instalado (opcional)"
     else
       print_info "$skill_name ya instalado o no disponible"
@@ -329,7 +338,7 @@ PLUGINS=(
 for plugin in "${PLUGINS[@]}"; do
   plugin_name=$(echo "$plugin" | cut -d'@' -f1)
   echo -e "  ${CYAN}→${NC} Plugin: $plugin_name..."
-  if claude plugin install "$plugin" 2>/dev/null; then
+  if _run_cli claude plugin install "$plugin"; then
     print_ok "$plugin_name instalado"
   else
     print_info "$plugin_name ya instalado o no disponible"
@@ -338,7 +347,7 @@ done
 
 # claude-powerline: conditional (only if Claude Code is present)
 echo -e "  ${CYAN}→${NC} Plugin: claude-powerline..."
-if claude plugin install "claude-powerline@claude-powerline" 2>/dev/null; then
+if _run_cli claude plugin install "claude-powerline@claude-powerline"; then
   print_ok "claude-powerline instalado"
 else
   print_info "claude-powerline ya instalado o no disponible"

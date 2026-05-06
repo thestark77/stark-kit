@@ -351,8 +351,9 @@ $CoreSkills = @(
 foreach ($skillRepo in $CoreSkills) {
   $skillName = Split-Path -Leaf $skillRepo
   Print-Info "Instalando skill: $skillName..."
-  $result = claude skill install "github:$skillRepo" 2>&1
-  if ($LASTEXITCODE -eq 0) {
+  $proc = Start-Process -FilePath "claude" -ArgumentList "skill","install","github:$skillRepo" -NoNewWindow -PassThru -RedirectStandardInput "NUL" -RedirectStandardOutput "NUL" -RedirectStandardError "NUL"
+  if (-not $proc.WaitForExit(30000)) { $proc.Kill() }
+  if ($proc.ExitCode -eq 0) {
     Print-Ok "$skillName instalado"
   } else {
     Print-Info "$skillName ya instalado o no disponible"
@@ -371,8 +372,9 @@ if ($InstallOptional) {
   foreach ($skillRepo in $OptionalSkills) {
     $skillName = Split-Path -Leaf $skillRepo
     Print-Info "Instalando skill: $skillName..."
-    $result = claude skill install "github:$skillRepo" 2>&1
-    if ($LASTEXITCODE -eq 0) {
+    $proc = Start-Process -FilePath "claude" -ArgumentList "skill","install","github:$skillRepo" -NoNewWindow -PassThru -RedirectStandardInput "NUL" -RedirectStandardOutput "NUL" -RedirectStandardError "NUL"
+    if (-not $proc.WaitForExit(30000)) { $proc.Kill() }
+    if ($proc.ExitCode -eq 0) {
       Print-Ok "$skillName instalado (opcional)"
     } else {
       Print-Info "$skillName ya instalado o no disponible"
@@ -393,8 +395,9 @@ $Plugins = @(
 
 foreach ($plugin in $Plugins) {
   Print-Info "Plugin: $($plugin.Name)..."
-  $result = claude plugin install $plugin.Id 2>&1
-  if ($LASTEXITCODE -eq 0) {
+  $proc = Start-Process -FilePath "claude" -ArgumentList "plugin","install",$plugin.Id -NoNewWindow -PassThru -RedirectStandardInput "NUL" -RedirectStandardOutput "NUL" -RedirectStandardError "NUL"
+  if (-not $proc.WaitForExit(30000)) { $proc.Kill() }
+  if ($proc.ExitCode -eq 0) {
     Print-Ok "$($plugin.Name) instalado"
   } else {
     Print-Info "$($plugin.Name) ya instalado o no disponible"
@@ -403,8 +406,9 @@ foreach ($plugin in $Plugins) {
 
 # claude-powerline: conditional (only if Claude Code is present)
 Print-Info "Plugin: claude-powerline..."
-$result = claude plugin install "claude-powerline@claude-powerline" 2>&1
-if ($LASTEXITCODE -eq 0) {
+$proc = Start-Process -FilePath "claude" -ArgumentList "plugin","install","claude-powerline@claude-powerline" -NoNewWindow -PassThru -RedirectStandardInput "NUL" -RedirectStandardOutput "NUL" -RedirectStandardError "NUL"
+if (-not $proc.WaitForExit(30000)) { $proc.Kill() }
+if ($proc.ExitCode -eq 0) {
   Print-Ok "claude-powerline instalado"
 } else {
   Print-Info "claude-powerline ya instalado o no disponible"
